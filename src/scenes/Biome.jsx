@@ -4,9 +4,11 @@ import { BIOMES } from '../data/game.js';
 import { matchBiome } from '../data/biomeMatch.js';
 import { PixelButton, StepSquares } from '../components/ui.jsx';
 import { Icon } from '../components/Icons.jsx';
+import { useComingSoon } from '../components/useComingSoon.jsx';
 
 export default function Biome() {
   const { goTo } = useGame();
+  const comingSoon = useComingSoon();
   const [hometown, setHometown] = useState('Dededo, Guam');
   const matchedId = matchBiome(hometown);
   const matched = BIOMES.find((b) => b.id === matchedId);
@@ -46,16 +48,19 @@ export default function Biome() {
         {BIOMES.map((b) => {
           const isYours = b.id === matchedId;
           return (
-            <div
+            <button
               key={b.id}
+              type="button"
               className={`biome-card ${isYours ? 'is-selected' : 'is-muted'}`}
               aria-current={isYours ? 'true' : undefined}
+              onClick={() => (b.open ? goTo('postcard') : comingSoon(b.title))}
             >
               {isYours && <span className="biome-card__tag">Yours</span>}
               <Icon name={b.icon} size={26} />
               <span className="biome-card__title">{b.title}</span>
               <span className="biome-card__body">{b.body}</span>
-            </div>
+              {!b.open && <span className="biome-card__soon">Coming soon</span>}
+            </button>
           );
         })}
       </div>

@@ -354,7 +354,6 @@ a {
 
 .nav__link.is-soon {
   color: var(--faint);
-  cursor: default;
 }
 
 .nav__chip {
@@ -522,10 +521,31 @@ a {
   box-shadow: var(--shadow-hero);
 }
 
+.biome-card {
+  cursor: pointer;
+}
+
 .biome-card.is-muted {
   border-color: rgba(30, 42, 34, 0.25);
   color: var(--muted);
-  cursor: default;
+}
+
+.biome-card__soon {
+  margin-top: auto;
+  padding: 2px 8px;
+  border: 2px solid var(--faint);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.biome-card.is-selected .biome-card__soon {
+  border-color: var(--ink);
+  color: var(--ink);
 }
 
 .biome-card.is-muted .icon {
@@ -2707,5 +2727,55 @@ button.row {
 
   .compose {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Coming-soon toast ---------- */
+.toast-region {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  translate: -50% 0;
+  z-index: 80;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 560px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hero);
+  font-size: 14px;
+  animation: toast-in 180ms ease-out both;
+}
+
+.toast__tag {
+  flex: none;
+  padding: 3px 8px;
+  background: var(--tag);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
   }
 }

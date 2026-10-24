@@ -17,7 +17,7 @@ const SEPTIC_WHY =
 // Scenario #4 (Help a Civilian): Fresh Water & Conservation
 export default {
   id: 'lens',
-  plate: 'THE LENS · DEDEDO · 4 OF 5',
+  plate: 'FRESH WATER · NORTH VILLAGE · 4 OF 5',
   persona: { name: 'Auntie Rose', age: 46, role: "Nina's neighbor, Dededo", color: 'var(--warning)' },
   intro:
     "Nina said you were the one to talk to. Our water bill went up, the pressure went down, and last month the water tasted — I don't know — like the beach. The whole village pulls from the same lens under our feet. Come, I'll show you around the house; tell me what we're doing wrong, and what isn't our fault.",

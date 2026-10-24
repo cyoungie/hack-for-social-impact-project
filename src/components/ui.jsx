@@ -2,6 +2,7 @@ import { useGame } from '../state/GameState.jsx';
 import { avatarColorValue } from '../data/game.js';
 import { Avatar } from './Avatar.jsx';
 import { Icon } from './Icons.jsx';
+import { useComingSoon } from './useComingSoon.jsx';
 
 export function PixelButton({ className = '', children, ...props }) {
   return (
@@ -85,6 +86,7 @@ const NAV_LINKS = ['ISLAND', 'BIOMES', 'COMPARE', 'ACT'];
 
 export function Nav({ plate, active }) {
   const { state, goTo } = useGame();
+  const comingSoon = useComingSoon();
   return (
     <header className="nav">
       <div className="nav__left">
@@ -104,9 +106,14 @@ export function Nav({ plate, active }) {
               {link}
             </button>
           ) : (
-            <span key={link} className="nav__link is-soon" title="Unlocks later">
+            <button
+              key={link}
+              type="button"
+              className="nav__link is-soon"
+              onClick={() => comingSoon(link.charAt(0) + link.slice(1).toLowerCase())}
+            >
               {link}
-            </span>
+            </button>
           ),
         )}
         <span className="nav__chip" title={state.playerName}>

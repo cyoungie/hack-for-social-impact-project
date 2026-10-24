@@ -20,14 +20,14 @@ export const BIOMES = [
 ];
 
 // Map slots in unlock order (1 -> 5). x/y are percentages of the island image box, so badges stay
-// anchored to the land. Slots without an entry in src/scenarios are shown as "in production".
+// anchored to the land. Slots without an entry in src/scenarios show "Coming soon".
 export const PROBLEMS = [
   {
     id: 'field',
     n: 1,
-    title: 'The Field · South',
+    title: 'Heavy Soil Erosion · Countryside',
     stat: 'Soil',
-    line: "team scenario — in production",
+    line: 'Help a farmer — storms are stealing the topsoil',
     color: 'var(--soil)',
     x: 40,
     y: 80,
@@ -36,10 +36,10 @@ export const PROBLEMS = [
   {
     id: 'ridge',
     n: 2,
-    title: 'The Ridge · South Hills',
+    title: 'Typhoon · River',
     stat: 'People',
-    line: 'team scenario — in production',
-    color: 'var(--danger)',
+    line: 'Help Nina’s village get ready before the next storm',
+    color: 'var(--people)',
     x: 22,
     y: 64,
     tag: 'PEOPLE',
@@ -47,9 +47,9 @@ export const PROBLEMS = [
   {
     id: 'coast',
     n: 3,
-    title: 'The Coast · Tumon',
+    title: 'Coral & Sea Life · Coast',
     stat: 'Reef',
-    line: 'half the reef gone grey in ten years',
+    line: 'Help a fisherman — half his reef has gone grey',
     color: 'var(--veg)',
     x: 53,
     y: 33,
@@ -60,9 +60,9 @@ export const PROBLEMS = [
   {
     id: 'lens',
     n: 4,
-    title: 'The Lens · Dededo',
+    title: 'Fresh Water & Conservation · North Village',
     stat: 'Water',
-    line: 'saltwater creeping into the wells',
+    line: 'One aquifer under everyone — and the taps taste salty',
     color: 'var(--water)',
     x: 74,
     y: 30,
@@ -73,9 +73,9 @@ export const PROBLEMS = [
   {
     id: 'industry',
     n: 5,
-    title: 'Industry & Military · Ysengsong',
+    title: 'Land Development · Industry & Military',
     stat: 'All stats',
-    line: 'a buildup the town can shape, not stop',
+    line: 'The water’s gone funny near the buildup — act, don’t move',
     color: 'var(--warning)',
     x: 63,
     y: 18,

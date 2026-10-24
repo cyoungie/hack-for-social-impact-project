@@ -4,7 +4,7 @@ import { Mark } from './stageKit.jsx';
 // Tone: the buildup isn't a villain to defeat — it's a force the town can't veto but CAN shape.
 export default {
   id: 'industry',
-  plate: 'INDUSTRY & MILITARY · 5 OF 5',
+  plate: 'LAND DEVELOPMENT · 5 OF 5',
   persona: { name: 'Marcus', age: 24, role: 'Works at the corner store', color: 'var(--people)' },
   intro:
     "Hey — you're the planner, right? Is your water tasting and looking funny too? Ours has been off for two weeks, right since they started clearing that parcel uphill. My uncle says there's nothing a town can do when the project's this big. I think he's wrong, but I don't actually know what the moves are. Do you?",

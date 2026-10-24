@@ -6,6 +6,7 @@ import { SCENARIOS, isBuilt, lockedBy } from '../scenarios/index.js';
 import { Nav, Plate, SegmentBar } from '../components/ui.jsx';
 import { Icon } from '../components/Icons.jsx';
 import { PointChips } from '../components/PointChips.jsx';
+import { useComingSoon } from '../components/useComingSoon.jsx';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
@@ -33,7 +34,7 @@ function CueCard({ problem, solved, boundsRef }) {
   }, [placement, boundsRef]);
 
   let status = null;
-  if (!scenario) status = 'IN PRODUCTION — team scenario';
+  if (!scenario) status = 'COMING SOON';
   else if (blocker) status = `LOCKED — solve ${blocker.title.split(' · ')[0]} first`;
 
   return (
@@ -51,10 +52,13 @@ function CueCard({ problem, solved, boundsRef }) {
         </Plate>
       </div>
       {status ? (
-        <p className="cue__locked">
+        <>
+          <p className="cue__body">{problem.line}</p>
+          <p className="cue__locked">
           <Icon name="lock" size={16} />
           {status}
-        </p>
+          </p>
+        </>
       ) : (
         <>
           <p className="cue__body">{problem.body}</p>
@@ -145,9 +149,11 @@ export default function ProblemMap() {
   const activeProblem = PROBLEMS.find((p) => p.id === active);
   const builtCount = PROBLEMS.filter((p) => isBuilt(p.id)).length;
 
+  const comingSoon = useComingSoon();
   const playable = (p) => isBuilt(p.id) && !lockedBy(p.id, solved);
   const enter = (p) => {
     if (playable(p)) startScenario(p.id);
+    else if (!isBuilt(p.id)) comingSoon(p.title);
   };
 
   // Float the last card's points up once, then clear them.
@@ -194,9 +200,9 @@ export default function ProblemMap() {
                     type="button"
                     className={`badge ${active === p.id ? 'is-active' : ''} ${playable(p) ? '' : 'is-locked'}`}
                     style={{ left: `${p.x}%`, top: `${p.y}%`, '--badge-color': p.color }}
-                    aria-label={`${p.n}. ${p.title}${playable(p) ? '' : isBuilt(p.id) ? ' (locked)' : ' (in production)'}`}
+                    aria-label={`${p.n}. ${p.title}${playable(p) ? '' : isBuilt(p.id) ? ' (locked)' : ' (coming soon)'}`}
                     aria-describedby={active === p.id ? `cue-${p.id}` : undefined}
-                    aria-disabled={!playable(p) || undefined}
+                    aria-disabled={(isBuilt(p.id) && !playable(p)) || undefined}
                     onMouseEnter={() => setActive(p.id)}
                     onMouseLeave={() => setActive(null)}
                     onFocus={() => setActive(p.id)}
@@ -258,9 +264,7 @@ export default function ProblemMap() {
                   </span>
                   <span className="row__text">
                     <span className="row__title">{p.title}</span>
-                    <span className="row__line">
-                      {p.stat} · {p.line}
-                    </span>
+                    <span className="row__line">{p.line}</span>
                   </span>
                   <Icon name={playable(p) ? 'chevron' : 'lock'} size={18} className="row__chev" />
                 </>
@@ -268,7 +272,7 @@ export default function ProblemMap() {
               const cls = `row ${active === p.id ? 'is-active' : ''} ${playable(p) ? '' : 'is-locked'}`;
               return (
                 <li key={p.id} onMouseEnter={() => setActive(p.id)} onMouseLeave={() => setActive(null)}>
-                  {playable(p) ? (
+                  {playable(p) || !isBuilt(p.id) ? (
                     <button type="button" className={cls} onClick={() => enter(p)}>
                       {content}
                     </button>
