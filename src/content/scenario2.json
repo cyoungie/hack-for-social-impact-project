@@ -1,0 +1,12 @@
+{
+  "id": 2,
+  "title": "Typhoon",
+  "location": "River",
+  "background": "/scenes/scene2.png",
+  "persona": { "name": "Nina", "sprite": "/sprites/persona2.png", "tint": "#A78BFA" },
+  "intro": [
+    "Hey — I'm Nina. My village sits right where the river bends.",
+    "Last typhoon, the river came up into Grandma's kitchen, and the mud never really left.",
+    "The next storm is coming whether we're ready or not. Help me get the village ready before it does."
+  ]
+}

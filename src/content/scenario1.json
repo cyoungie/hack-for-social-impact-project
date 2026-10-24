@@ -1,0 +1,12 @@
+{
+  "id": 1,
+  "title": "Heavy Soil Erosion",
+  "location": "Countryside",
+  "background": "/scenes/scene1.png",
+  "persona": { "name": "Tun Jack", "sprite": "/sprites/persona1.png", "tint": "#C8965A" },
+  "intro": [
+    "You're the new planner? Good. Come stand in this field with me a minute.",
+    "Every big storm, the rain runs off bare dirt and takes the topsoil with it — down the gullies and into the river.",
+    "My father's field was dark soil to your knee. Now it's red clay at my ankle. Help me keep what's left."
+  ]
+}

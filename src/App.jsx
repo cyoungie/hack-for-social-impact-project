@@ -4,14 +4,16 @@ import Account from './scenes/Account.jsx';
 import Biome from './scenes/Biome.jsx';
 import Postcard from './scenes/Postcard.jsx';
 import ProblemMap from './scenes/ProblemMap.jsx';
-import Scenario from './scenes/Scenario.jsx';
+import ScenarioIntro from './scenes/ScenarioIntro.jsx';
+import GameScene from './scenes/GameScene.jsx';
 
 const SCENES = {
   account: Account,
   biome: Biome,
   postcard: Postcard,
   map: ProblemMap,
-  scenario: Scenario,
+  intro: ScenarioIntro,
+  game: GameScene,
 };
 
 export default function App() {
@@ -29,5 +31,5 @@ export default function App() {
     document.querySelector('h1')?.focus();
   }, [state.scene]);
 
-  return <Scene key={state.scene === 'scenario' ? state.run?.id : state.scene} />;
+  return <Scene key={`${state.scene}:${state.introId ?? state.gameId ?? ''}`} />;
 }

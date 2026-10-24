@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
 import { useGame } from '../state/GameState.jsx';
-import { SCENARIOS } from '../scenarios/index.js';
 import { Scenery, Mark } from '../scenarios/stageKit.jsx';
 import { sumPoints } from '../data/scoring.js';
 import { avatarColorValue } from '../data/game.js';
@@ -80,10 +79,11 @@ function OneSystemFrame({ onClose }) {
   );
 }
 
-export default function Scenario() {
+// Gameplay for a built scenario, mounted inside GameScene. Phases: explore -> consequence -> card.
+export default function ScenarioRunner({ scenario: sc, content }) {
   const { state, setPhase, completeHotspot, collect, goTo } = useGame();
   const { run } = state;
-  const sc = SCENARIOS[run.id];
+  const persona = { ...sc.persona, color: content.persona.tint };
   const [openId, setOpenId] = useState(null);
   const [result, setResult] = useState(null);
   const [frame, setFrame] = useState(null);
@@ -124,8 +124,8 @@ export default function Scenario() {
       <Nav plate={sc.plate} />
       <main className="scenario">
         <div className="scenario__main">
-          <section className={`stage ${run.phase === 'intro' ? 'is-intro' : ''}`} aria-label="Scene">
-            <Scenery id={sc.id} blocks={sc.blocks} swap={showOutcome ? sc.consequence[outcome].swap : {}} />
+          <section className="stage" aria-label="Scene">
+            <Scenery src={content.background} blocks={sc.blocks} swap={showOutcome ? sc.consequence[outcome].swap : {}} />
             <div className="stage__overlays">{sc.overlays(done)}</div>
 
             {!showOutcome &&
@@ -171,24 +171,21 @@ export default function Scenario() {
 
           </section>
 
-          {run.phase === 'intro' && (
-            <DialogueBox persona={sc.persona} text={sc.intro} cta={sc.introCta} onNext={() => setPhase('explore')} />
-          )}
           {run.phase === 'consequence' && (
-            <DialogueBox persona={sc.persona} text={sc.closing} cta="Open knowledge card" onNext={() => setPhase('card')} />
+            <DialogueBox persona={persona} text={sc.closing} cta="Open knowledge card" onNext={() => setPhase('card')} />
           )}
         </div>
 
         <aside className="scenario__rail">
-          <PixelCard className="mini-nina" style={{ '--persona': sc.persona.color }}>
+          <PixelCard className="mini-nina" style={{ '--persona': persona.color }}>
             <span className="mini-nina__avatar">
-              <Avatar color={sc.persona.color} size={40} />
+              <Avatar color={persona.color} size={40} />
             </span>
             <span>
               <span className="mini-nina__name">
-                {sc.persona.name} · {sc.persona.age}
+                {persona.name} · {persona.age}
               </span>
-              <span className="mini-nina__quote">{sc.persona.role}</span>
+              <span className="mini-nina__quote">{persona.role}</span>
             </span>
           </PixelCard>
 
@@ -234,7 +231,7 @@ export default function Scenario() {
         <Dialog labelledBy="hotspot-title" onClose={result ? closeHotspot : () => setOpenId(null)} className="hdialog">
           <div className="kcard__eyebrow">
             <span className="label">
-              {sc.persona.name} · {open.label}
+              {persona.name} · {open.label}
             </span>
             {!result && (
               <button type="button" className="hdialog__close" onClick={() => setOpenId(null)}>

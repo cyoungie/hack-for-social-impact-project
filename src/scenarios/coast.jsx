@@ -4,10 +4,7 @@ import { Mark, Trace } from './stageKit.jsx';
 export default {
   id: 'coast',
   plate: 'CORAL & SEA LIFE · COAST · 3 OF 5',
-  persona: { name: 'Tatan Ben', age: 58, role: 'Fisherman, Tumon', color: 'var(--soil)' },
-  intro:
-    "Hågu? Good. I've fished this reef since before your mother was born. Half of it has gone grey in ten years, and the fish went with it. People say it's the heat, and the heat is real — but some of what's killing it starts up on the land, where you've been working. Walk the dock with me and I'll show you.",
-  introCta: 'Walk the dock',
+  persona: { name: 'Tatan Ben', age: 58, role: 'Fisherman, Tumon' },
   closing:
     "The reef fed my father and it feeds me. Whether it feeds anybody after that — that part happens up on the land, where you're headed next.",
 

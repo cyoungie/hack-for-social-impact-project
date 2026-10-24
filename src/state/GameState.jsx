@@ -4,7 +4,7 @@ import { addPoints, clampBars } from '../data/scoring.js';
 const STORAGE_KEY = 'cg_save';
 const VERSION = 2;
 
-export const SCENE_ORDER = ['account', 'biome', 'postcard', 'map', 'scenario'];
+export const SCENE_ORDER = ['account', 'biome', 'postcard', 'map', 'intro', 'game'];
 
 export const START_BARS = { water: 52, soil: 58, veg: 60, people: 55 };
 
@@ -15,7 +15,11 @@ const INITIAL = {
   scene: 'account',
   solvedProblems: [],
   bars: START_BARS,
-  // Active scenario: { id, phase: 'intro'|'explore'|'consequence'|'card', done: { hotspotId: { points, state } } }
+  // Intro being shown (never saved — a refresh during an intro lands back on the map).
+  introId: null,
+  // Map slot whose GameScene is open.
+  gameId: null,
+  // Active scenario: { id, phase: 'explore'|'consequence'|'card', done: { hotspotId: { points, state } } }
   run: null,
   // Points from the last collected card, floated up on the map hub once.
   lastGain: null,
@@ -33,8 +37,11 @@ function load() {
     }
     const state = { ...INITIAL, ...saved, bars: { ...START_BARS, ...(saved.bars || {}) } };
     if (!Array.isArray(state.solvedProblems)) state.solvedProblems = [];
+    // Saves from before the intro/game split.
+    if (state.scene === 'scenario') Object.assign(state, { scene: state.run ? 'game' : 'map', gameId: state.run?.id ?? null });
+    if (state.run?.phase === 'intro') state.run = { ...state.run, phase: 'explore' };
     if (!SCENE_ORDER.includes(state.scene) || !state.playerName) state.scene = 'account';
-    if (state.scene === 'scenario' && !state.run) state.scene = 'map';
+    if (state.scene === 'intro' || (state.scene === 'game' && !state.gameId)) state.scene = 'map';
     return state;
   } catch {
     return INITIAL;
@@ -42,8 +49,10 @@ function load() {
 }
 
 function save(state) {
+  const { introId, ...rest } = state;
+  const toSave = state.scene === 'intro' ? { ...rest, scene: 'map' } : rest;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   } catch {
     // Storage blocked (private mode, quota) — the game still runs, it just won't survive refresh.
   }
@@ -59,12 +68,17 @@ export function GameStateProvider({ children }) {
   const update = useCallback((patch) => setState((s) => ({ ...s, ...patch })), []);
   const goTo = useCallback((scene) => setState((s) => ({ ...s, scene })), []);
 
-  const startScenario = useCallback(
+  // Map pick -> intro -> BEGIN! -> GameScene. A half-played run of the same scenario resumes.
+  const openIntro = useCallback((id) => setState((s) => ({ ...s, scene: 'intro', introId: id })), []);
+
+  const beginScenario = useCallback(
     (id) =>
       setState((s) => ({
         ...s,
-        scene: 'scenario',
-        run: s.run?.id === id ? s.run : { id, phase: 'intro', done: {} },
+        scene: 'game',
+        introId: null,
+        gameId: id,
+        run: s.run?.id === id ? s.run : { id, phase: 'explore', done: {} },
       })),
     [],
   );
@@ -84,6 +98,7 @@ export function GameStateProvider({ children }) {
         ...s,
         scene: 'map',
         run: null,
+        gameId: null,
         bars: s.solvedProblems.includes(id) ? s.bars : clampBars(addPoints(s.bars, points)),
         lastGain: s.solvedProblems.includes(id) ? null : points,
         solvedProblems: s.solvedProblems.includes(id) ? s.solvedProblems : [...s.solvedProblems, id],
@@ -91,9 +106,12 @@ export function GameStateProvider({ children }) {
     [],
   );
 
+  // 'intro' consumes every key (see ScenarioIntro); everything else is normal play.
+  const inputMode = state.scene === 'intro' ? 'intro' : 'play';
+
   const value = useMemo(
-    () => ({ state, update, goTo, startScenario, setPhase, completeHotspot, collect }),
-    [state, update, goTo, startScenario, setPhase, completeHotspot, collect],
+    () => ({ state, inputMode, update, goTo, openIntro, beginScenario, setPhase, completeHotspot, collect }),
+    [state, inputMode, update, goTo, openIntro, beginScenario, setPhase, completeHotspot, collect],
   );
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

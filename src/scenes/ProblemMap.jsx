@@ -2,14 +2,16 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useGame } from '../state/GameState.jsx';
 import { PROBLEMS } from '../data/game.js';
 import { STATS } from '../data/scoring.js';
-import { SCENARIOS, isBuilt, lockedBy } from '../scenarios/index.js';
+import { isBuilt, lockedBy } from '../scenarios/index.js';
 import { Nav, Plate, SegmentBar } from '../components/ui.jsx';
 import { Icon } from '../components/Icons.jsx';
 import { PointChips } from '../components/PointChips.jsx';
-import { useComingSoon } from '../components/useComingSoon.jsx';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
+
+// Zoom/pan survives leaving for an intro or a scenario (session only, not saved).
+let savedView = { z: 1, x: 0, y: 0 };
 
 const PLACEMENTS = {
   right: (p) => ({ top: `${p.y}%`, left: `calc(${p.x}% + 42px * var(--inv))`, transformOrigin: 'left top' }),
@@ -22,7 +24,6 @@ function CueCard({ problem, solved, boundsRef }) {
   const ref = useRef(null);
   const [placement, setPlacement] = useState(problem.x > 55 ? 'left' : 'right');
   const style = PLACEMENTS[placement](problem);
-  const scenario = SCENARIOS[problem.id];
   const blocker = lockedBy(problem.id, solved);
 
   useLayoutEffect(() => {
@@ -34,8 +35,7 @@ function CueCard({ problem, solved, boundsRef }) {
   }, [placement, boundsRef]);
 
   let status = null;
-  if (!scenario) status = 'COMING SOON';
-  else if (blocker) status = `LOCKED — solve ${blocker.title.split(' · ')[0]} first`;
+  if (blocker) status = `LOCKED — solve ${blocker.title.split(' · ')[0]} first`;
 
   return (
     <div
@@ -61,7 +61,7 @@ function CueCard({ problem, solved, boundsRef }) {
         </>
       ) : (
         <>
-          <p className="cue__body">{problem.body}</p>
+          <p className="cue__body">{problem.body ?? problem.line}</p>
           <div className="cue__foot">
             <span className="cue__difficulty">
               <span className="label">Difficulty</span>
@@ -70,7 +70,7 @@ function CueCard({ problem, solved, boundsRef }) {
               ))}
             </span>
             <span className="cue__cta">
-              {solved.includes(problem.id) ? 'Solved · play again' : `Click to meet ${scenario.persona.name}`}
+              {solved.includes(problem.id) ? 'Solved · play again' : `Click to meet ${problem.persona.name}`}
             </span>
           </div>
         </>
@@ -81,8 +81,12 @@ function CueCard({ problem, solved, boundsRef }) {
 
 // Wheel zooms toward the cursor, drag pans, buttons for keyboard. Pan is clamped so the island stays in view.
 function usePanZoom(viewRef) {
-  const [view, setView] = useState({ z: 1, x: 0, y: 0 });
+  const [view, setView] = useState(savedView);
   const drag = useRef(null);
+
+  useEffect(() => {
+    savedView = view;
+  }, [view]);
 
   const clamp = (v) => {
     const r = viewRef.current?.getBoundingClientRect();
@@ -139,7 +143,7 @@ function usePanZoom(viewRef) {
 }
 
 export default function ProblemMap() {
-  const { state, update, startScenario } = useGame();
+  const { state, update, openIntro } = useGame();
   const [active, setActive] = useState(null);
   const [imgOk, setImgOk] = useState(true);
   const oceanRef = useRef(null);
@@ -149,11 +153,9 @@ export default function ProblemMap() {
   const activeProblem = PROBLEMS.find((p) => p.id === active);
   const builtCount = PROBLEMS.filter((p) => isBuilt(p.id)).length;
 
-  const comingSoon = useComingSoon();
-  const playable = (p) => isBuilt(p.id) && !lockedBy(p.id, solved);
+  const playable = (p) => !lockedBy(p.id, solved);
   const enter = (p) => {
-    if (playable(p)) startScenario(p.id);
-    else if (!isBuilt(p.id)) comingSoon(p.title);
+    if (playable(p)) openIntro(p.id);
   };
 
   // Float the last card's points up once, then clear them.
@@ -200,9 +202,9 @@ export default function ProblemMap() {
                     type="button"
                     className={`badge ${active === p.id ? 'is-active' : ''} ${playable(p) ? '' : 'is-locked'}`}
                     style={{ left: `${p.x}%`, top: `${p.y}%`, '--badge-color': p.color }}
-                    aria-label={`${p.n}. ${p.title}${playable(p) ? '' : isBuilt(p.id) ? ' (locked)' : ' (coming soon)'}`}
+                    aria-label={`${p.n}. ${p.title}${playable(p) ? '' : ' (locked)'}`}
                     aria-describedby={active === p.id ? `cue-${p.id}` : undefined}
-                    aria-disabled={(isBuilt(p.id) && !playable(p)) || undefined}
+                    aria-disabled={!playable(p) || undefined}
                     onMouseEnter={() => setActive(p.id)}
                     onMouseLeave={() => setActive(null)}
                     onFocus={() => setActive(p.id)}
@@ -272,7 +274,7 @@ export default function ProblemMap() {
               const cls = `row ${active === p.id ? 'is-active' : ''} ${playable(p) ? '' : 'is-locked'}`;
               return (
                 <li key={p.id} onMouseEnter={() => setActive(p.id)} onMouseLeave={() => setActive(null)}>
-                  {playable(p) || !isBuilt(p.id) ? (
+                  {playable(p) ? (
                     <button type="button" className={cls} onClick={() => enter(p)}>
                       {content}
                     </button>
@@ -301,7 +303,7 @@ export default function ProblemMap() {
           </div>
 
           <p className="sidebar__foot">
-            {builtCount} of 5 places are open so far. Solve all five to unlock your island proposal — a real one-pager
+            {builtCount} of 5 places are fully playable so far. Solve all five to unlock your island proposal — a real one-pager
             you can bring to a real meeting.
           </p>
         </aside>

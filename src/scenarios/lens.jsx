@@ -18,10 +18,7 @@ const SEPTIC_WHY =
 export default {
   id: 'lens',
   plate: 'FRESH WATER · NORTH VILLAGE · 4 OF 5',
-  persona: { name: 'Auntie Rose', age: 46, role: "Nina's neighbor, Dededo", color: 'var(--warning)' },
-  intro:
-    "Nina said you were the one to talk to. Our water bill went up, the pressure went down, and last month the water tasted — I don't know — like the beach. The whole village pulls from the same lens under our feet. Come, I'll show you around the house; tell me what we're doing wrong, and what isn't our fault.",
-  introCta: 'Look around',
+  persona: { name: 'Auntie Rose', age: 46, role: "Nina's neighbor, Dededo" },
   closing:
     "So it's the dial, the drips, and what we bury in the yard. We can do all three. Tell Nina the water tastes like water again.",
 

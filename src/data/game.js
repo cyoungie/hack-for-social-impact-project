@@ -1,3 +1,5 @@
+import { CONTENT } from '../content/index.js';
+
 export const AVATAR_COLORS = [
   { id: 'green', label: 'Green', value: 'var(--veg)' },
   { id: 'blue', label: 'Blue', value: 'var(--water)' },
@@ -20,12 +22,12 @@ export const BIOMES = [
 ];
 
 // Map slots in unlock order (1 -> 5). x/y are percentages of the island image box, so badges stay
-// anchored to the land. Slots without an entry in src/scenarios show "Coming soon".
-export const PROBLEMS = [
+// anchored to the land. Every slot opens its intro; slots without gameplay in src/scenarios land on
+// the GameScene stub.
+const SLOTS = [
   {
     id: 'field',
     n: 1,
-    title: 'Heavy Soil Erosion · Countryside',
     stat: 'Soil',
     line: 'Help a farmer — storms are stealing the topsoil',
     color: 'var(--soil)',
@@ -36,7 +38,6 @@ export const PROBLEMS = [
   {
     id: 'ridge',
     n: 2,
-    title: 'Typhoon · River',
     stat: 'People',
     line: 'Help Nina’s village get ready before the next storm',
     color: 'var(--people)',
@@ -47,7 +48,6 @@ export const PROBLEMS = [
   {
     id: 'coast',
     n: 3,
-    title: 'Coral & Sea Life · Coast',
     stat: 'Reef',
     line: 'Help a fisherman — half his reef has gone grey',
     color: 'var(--veg)',
@@ -60,7 +60,6 @@ export const PROBLEMS = [
   {
     id: 'lens',
     n: 4,
-    title: 'Fresh Water & Conservation · North Village',
     stat: 'Water',
     line: 'One aquifer under everyone — and the taps taste salty',
     color: 'var(--water)',
@@ -73,7 +72,6 @@ export const PROBLEMS = [
   {
     id: 'industry',
     n: 5,
-    title: 'Land Development · Industry & Military',
     stat: 'All stats',
     line: 'The water’s gone funny near the buildup — act, don’t move',
     color: 'var(--warning)',
@@ -84,5 +82,11 @@ export const PROBLEMS = [
     difficulty: 3,
   },
 ];
+
+// Title, location and persona come from src/content/scenario{n}.json.
+export const PROBLEMS = SLOTS.map((slot) => {
+  const c = CONTENT[slot.id];
+  return { ...slot, title: `${c.title} · ${c.location}`, persona: c.persona };
+});
 
 export const SAFE_YIELD = 52;

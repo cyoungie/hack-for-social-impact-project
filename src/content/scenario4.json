@@ -1,0 +1,12 @@
+{
+  "id": 4,
+  "title": "Fresh Water & Conservation",
+  "location": "North Village",
+  "background": "/scenes/scene4.png",
+  "persona": { "name": "Auntie Rose", "sprite": "/sprites/persona4.png", "tint": "#5BA8E0" },
+  "intro": [
+    "Nina said you were the one to talk to. Our water bill went up, the pressure went down, and last month the water tasted — I don't know — like the beach.",
+    "The whole village pulls from the same lens under our feet.",
+    "Come, I'll show you around the house. Tell me what we're doing wrong, and what isn't our fault."
+  ]
+}

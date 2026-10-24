@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Icon } from '../components/Icons.jsx';
 
-// Flat block scenery in percentages. Designer art drops in at /scenes/{id}.png and replaces it.
-export function Scenery({ id, blocks, swap = {} }) {
+// Flat block scenery in percentages. Designer art at `src` (the scenario's background) replaces it.
+export function Scenery({ src, blocks, swap = {} }) {
   const [artOk, setArtOk] = useState(true);
   return (
     <div className="scenery" aria-hidden="true">
       {artOk && (
-        <img className="scenery__art" src={`/scenes/${id}.png`} alt="" onError={() => setArtOk(false)} />
+        <img className="scenery__art" src={src} alt="" onError={() => setArtOk(false)} />
       )}
       {!artOk &&
         blocks.map((b, i) => (

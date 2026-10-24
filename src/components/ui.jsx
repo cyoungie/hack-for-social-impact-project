@@ -1,16 +1,17 @@
+import { forwardRef } from 'react';
 import { useGame } from '../state/GameState.jsx';
 import { avatarColorValue } from '../data/game.js';
 import { Avatar } from './Avatar.jsx';
 import { Icon } from './Icons.jsx';
 import { useComingSoon } from './useComingSoon.jsx';
 
-export function PixelButton({ className = '', children, ...props }) {
+export const PixelButton = forwardRef(function PixelButton({ className = '', children, ...props }, ref) {
   return (
-    <button type="button" className={`pbtn ${className}`} {...props}>
+    <button type="button" ref={ref} className={`pbtn ${className}`} {...props}>
       {children}
     </button>
   );
-}
+});
 
 export function PixelCard({ hero = false, as: Tag = 'div', className = '', children, ...props }) {
   return (
