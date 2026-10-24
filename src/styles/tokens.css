@@ -1,0 +1,57 @@
+/* COMMON GROUND — locked design tokens. Use nothing else. */
+:root {
+  /* Surfaces + ink */
+  --bg: #ffffff;
+  --panel: #eaf4e7;
+  --cream: #fdf8ec;
+  --postcard: #f7f1de;
+  --ink: #1e2a22;
+  --btn-ink: #13201a;
+  --muted: #5a6a5f;
+  --faint: #8a978d;
+
+  /* Brand */
+  --accent: #4cc269;
+  --deep: #15803d;
+  --wood: #8a5a2e;
+
+  /* Stats + states */
+  --water: #5ba8e0;
+  --soil: #c8965a;
+  --veg: #4cc269;
+  --people: #a78bfa;
+  --warning: #e8b55c;
+  --danger: #e66a6a;
+  --gold: #9a7514;
+
+  /* Selection + chips */
+  --select: #dff4e2;
+  --tag: #ffd95e;
+  --risk-rising: #f5dca6;
+  --risk-severe: #f3b9b9;
+  --ocean-line: #a9d4f2;
+
+  /* Ocean viewport (one of two allowed gradients) */
+  --ocean: linear-gradient(165deg, #2e73a6, #1d4c78 55%, #16395c);
+
+  /* Construction */
+  --border-w: 3px;
+  --border: var(--border-w) solid var(--ink);
+  --shadow-card: 6px 6px 0 rgba(30, 42, 34, 0.16);
+  --shadow-hero: 8px 8px 0 var(--ink);
+  --shadow-btn: 0 6px 0 var(--ink);
+  --shadow-btn-pressed: 0 2px 0 var(--ink);
+  --radius: 6px;
+  --radius-sm: 4px;
+  --radius-lg: 8px;
+
+  /* Texture */
+  --dots: radial-gradient(rgba(30, 42, 34, 0.06) 1.5px, transparent 1.5px);
+  --dots-size: 22px 22px;
+
+  /* Type */
+  --font-pixel: 'Pixelify Sans', ui-monospace, monospace;
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+
+  --nav-h: 68px;
+}
