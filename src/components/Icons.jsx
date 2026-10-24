@@ -52,6 +52,12 @@ const PATHS = {
     </>
   ),
   chevron: <path d="M9 5l7 7-7 7" />,
+  search: (
+    <>
+      <rect x="4" y="4" width="12" height="12" />
+      <path d="M16 16l5 5" />
+    </>
+  ),
   check: <path d="M4 12l5 5L20 6" />,
   lock: (
     <>

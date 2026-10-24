@@ -61,3 +61,23 @@ export function matchBiome(hometown) {
   }
   return best ? best.biome : null;
 }
+
+const ACRONYMS = new Set(['nyc', 'uae']);
+const displayName = (place) =>
+  ACRONYMS.has(place) ? place.toUpperCase() : place.replace(/\b[a-z]/g, (c) => c.toUpperCase());
+
+// Place suggestions for the search box: names starting with the query first, then names containing it.
+export function searchPlaces(query, limit = 6) {
+  const q = normalize(query);
+  if (!q) return [];
+  const starts = [];
+  const contains = [];
+  for (const [biome, places] of Object.entries(PLACES)) {
+    for (const place of places) {
+      if (place.startsWith(q) || place.split(' ').some((w) => w.startsWith(q))) starts.push({ name: displayName(place), biome });
+      else if (place.includes(q)) contains.push({ name: displayName(place), biome });
+    }
+  }
+  starts.sort((a, b) => a.name.length - b.name.length);
+  return [...starts, ...contains].slice(0, limit);
+}
