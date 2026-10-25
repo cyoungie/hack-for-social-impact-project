@@ -272,7 +272,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
           totals={totals}
           outcome={outcome}
           playerName={state.playerName}
-          onCollect={() => collect(sc.id)}
+          onCollect={() => collect(sc.id, { outcome, points: totals })}
           onBack={() => goTo('map')}
         />
       )}

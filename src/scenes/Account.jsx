@@ -1,7 +1,8 @@
 import { useGame } from '../state/GameState.jsx';
-import { AVATAR_COLORS, avatarColorValue } from '../data/game.js';
+import { avatarColorValue } from '../data/game.js';
 import { PixelButton, PixelCard, StepSquares } from '../components/ui.jsx';
 import { Avatar } from '../components/Avatar.jsx';
+import { PlaceSearch } from '../components/PlaceSearch.jsx';
 
 export default function Account() {
   const { state, update } = useGame();
@@ -20,15 +21,10 @@ export default function Account() {
         <span className="wordmark">Common Ground</span>
         <StepSquares step={1} label="Your account" />
         <h1 tabIndex={-1}>Make your planner.</h1>
-        <p className="lede">
-          Your name goes on every proposal you send into the real world. Choose it like it'll be read out loud at a
-          village meeting.
-        </p>
-
         <form onSubmit={submit} className="stack">
           <div className="field">
             <label className="label" htmlFor="planner-name">
-              Planner name
+              Your name
             </label>
             <input
               id="planner-name"
@@ -36,34 +32,23 @@ export default function Account() {
               type="text"
               maxLength={20}
               autoComplete="off"
-              placeholder="your_name"
+              placeholder="your name"
               value={name}
               onChange={(e) => update({ playerName: e.target.value })}
             />
           </div>
 
-          <fieldset className="field">
-            <legend className="label">Avatar color</legend>
-            <div className="swatches">
-              {AVATAR_COLORS.map((c) => (
-                <label key={c.id} className={`swatch ${state.avatarColor === c.id ? 'is-selected' : ''}`}>
-                  <input
-                    className="sr-only"
-                    type="radio"
-                    name="avatar-color"
-                    value={c.id}
-                    checked={state.avatarColor === c.id}
-                    onChange={() => update({ avatarColor: c.id })}
-                  />
-                  <span className="swatch__fill" style={{ background: c.value }} />
-                  <span className="sr-only">{c.label}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <PlaceSearch
+            id="explore-place"
+            className="field"
+            label="Where do you want to explore?"
+            placeholder="Search a place"
+            value={state.place}
+            onChange={(place) => update({ place })}
+          />
 
           <PixelButton type="submit" className="pbtn--block" disabled={!canCreate}>
-            Create account
+            Start
           </PixelButton>
         </form>
       </section>

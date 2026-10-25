@@ -7,6 +7,7 @@ import ProblemMap from './scenes/ProblemMap.jsx';
 import ScenarioIntro from './scenes/ScenarioIntro.jsx';
 import GameScene from './scenes/GameScene.jsx';
 import Act from './scenes/Act.jsx';
+import Profile from './scenes/Profile.jsx';
 
 const SCENES = {
   account: Account,
@@ -16,6 +17,7 @@ const SCENES = {
   intro: ScenarioIntro,
   game: GameScene,
   act: Act,
+  profile: Profile,
 };
 
 export default function App() {

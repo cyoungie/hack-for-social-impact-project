@@ -107,9 +107,15 @@ export function Nav({ plate, active }) {
             {link.id}
           </button>
         ))}
-        <span className="nav__chip" title={state.playerName}>
+        <button
+          type="button"
+          className={`nav__chip ${active === 'PROFILE' ? 'is-active' : ''}`}
+          aria-label={`${state.playerName} — your profile and progress`}
+          aria-current={active === 'PROFILE' ? 'page' : undefined}
+          onClick={() => goTo('profile')}
+        >
           <Avatar color={avatarColorValue(state.avatarColor)} size={28} />
-        </span>
+        </button>
       </nav>
     </header>
   );

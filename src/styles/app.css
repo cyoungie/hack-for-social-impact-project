@@ -354,6 +354,8 @@ a {
 
 
 .nav__chip {
+  padding: 0;
+  cursor: pointer;
   display: grid;
   place-items: center;
   width: 38px;
@@ -3236,4 +3238,257 @@ button.row {
 .compare__note {
   font-size: 13px;
   color: var(--muted);
+}
+
+.nav__chip:hover,
+.nav__chip.is-active {
+  background: var(--select);
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.account__form .input-icon {
+  width: 100%;
+}
+
+/* ---------- Profile ---------- */
+.profile {
+  width: min(960px, calc(100% - 56px));
+  margin: 0 auto;
+  padding: 36px 0 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.profile__hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+}
+
+.profile__avatar {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  background: var(--panel);
+  border: var(--border);
+  border-radius: var(--radius);
+}
+
+.profile__hero h1 {
+  font-size: 38px;
+  word-break: break-word;
+}
+
+.profile__continue {
+  margin: 0;
+}
+
+.profile__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 22px;
+  background: var(--cream);
+}
+
+.stat__num {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1;
+}
+
+.stat__of {
+  font-size: 22px;
+  color: var(--muted);
+}
+
+.profile__section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile__h2 {
+  font-size: 22px;
+  padding-bottom: 10px;
+  border-bottom: var(--border);
+}
+
+.path {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.path__step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 0;
+}
+
+/* Zig-zag like a lesson path, joined by a dashed line. */
+.path__step:nth-child(even) {
+  padding-left: 72px;
+}
+
+.path__step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 34px;
+  top: 78px;
+  height: 22px;
+  border-left: 3px dashed var(--faint);
+}
+
+.path__step:nth-child(even):not(:last-child)::after {
+  left: 106px;
+}
+
+.path__node {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  padding: 0;
+  background: var(--node);
+  color: var(--ink);
+  border: var(--border);
+  border-radius: 50%;
+  box-shadow: 0 6px 0 var(--ink);
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 26px;
+}
+
+button.path__node {
+  cursor: pointer;
+}
+
+button.path__node:active {
+  translate: 0 4px;
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.path__step.is-locked .path__node {
+  background: var(--panel);
+  color: var(--faint);
+  border-color: var(--faint);
+  box-shadow: 0 6px 0 var(--faint);
+}
+
+.path__step.is-soon .path__node {
+  background: color-mix(in srgb, var(--node) 35%, var(--bg));
+}
+
+.path__step.is-progress .path__node {
+  outline: 3px dashed var(--ink);
+  outline-offset: 5px;
+}
+
+.path__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.path__title {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.path__status {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.path__step.is-done .path__status {
+  color: var(--deep);
+}
+
+.kc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.kc {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 18px 20px;
+  background: var(--cream);
+  border: var(--border);
+  border-top: 8px solid var(--node);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.kc__title {
+  font-size: 20px;
+}
+
+.kc__fact {
+  font-size: 14px;
+}
+
+.kc__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.profile__reset {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 2px solid var(--panel);
+}
+
+.profile__reset .pbtn {
+  margin: 0;
+  font-size: 16px;
+  padding: 8px 16px;
+}
+
+.profile__link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.path__node:active {
+    translate: none;
+  }
 }

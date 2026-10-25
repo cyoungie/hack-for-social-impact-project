@@ -3,14 +3,20 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 const STORAGE_KEY = 'cg_save';
 const VERSION = 2;
 
-export const SCENE_ORDER = ['account', 'biome', 'postcard', 'map', 'intro', 'game', 'act'];
+export const SCENE_ORDER = ['account', 'biome', 'postcard', 'map', 'intro', 'game', 'act', 'profile'];
 
 const INITIAL = {
   version: VERSION,
   playerName: '',
   avatarColor: 'green',
+  // Where the player wants to explore (as typed or picked in the place search).
+  place: '',
   scene: 'account',
   solvedProblems: [],
+  // Per collected card: { outcome: 'good'|'bad', points, at: 'YYYY-MM-DD' }.
+  results: {},
+  // Local dates the player did something (for the day streak), newest last.
+  playDays: [],
   // Intro being shown (never saved — a refresh during an intro lands back on the map).
   introId: null,
   // Map slot whose GameScene is open.
@@ -54,6 +60,14 @@ function save(state) {
   }
 }
 
+// Local calendar day, e.g. '2026-10-24'.
+export const dayKey = (d = new Date()) => d.toLocaleDateString('en-CA');
+
+const withToday = (days) => {
+  const today = dayKey();
+  return days.includes(today) ? days : [...days, today].slice(-60);
+};
+
 const GameContext = createContext(null);
 
 export function GameStateProvider({ children }) {
@@ -83,19 +97,32 @@ export function GameStateProvider({ children }) {
 
   const completeHotspot = useCallback(
     (hotspotId, result) =>
-      setState((s) => ({ ...s, run: { ...s.run, done: { ...s.run.done, [hotspotId]: result } } })),
+      setState((s) => ({
+        ...s,
+        playDays: withToday(s.playDays),
+        run: { ...s.run, done: { ...s.run.done, [hotspotId]: result } },
+      })),
     [],
   );
 
   const collect = useCallback(
-    (id) =>
+    (id, result) =>
       setState((s) => ({
         ...s,
         scene: 'map',
         run: null,
         gameId: null,
+        playDays: withToday(s.playDays),
+        results: { ...s.results, [id]: { ...result, at: dayKey() } },
         solvedProblems: s.solvedProblems.includes(id) ? s.solvedProblems : [...s.solvedProblems, id],
       })),
+    [],
+  );
+
+  // Fresh start for demos: keeps the planner (name, color, place), clears everything they've played.
+  const resetProgress = useCallback(
+    () =>
+      setState((s) => ({ ...INITIAL, playerName: s.playerName, avatarColor: s.avatarColor, place: s.place, scene: 'map' })),
     [],
   );
 
@@ -103,8 +130,8 @@ export function GameStateProvider({ children }) {
   const inputMode = state.scene === 'intro' ? 'intro' : 'play';
 
   const value = useMemo(
-    () => ({ state, inputMode, update, goTo, openIntro, beginScenario, setPhase, completeHotspot, collect }),
-    [state, inputMode, update, goTo, openIntro, beginScenario, setPhase, completeHotspot, collect],
+    () => ({ state, inputMode, update, goTo, openIntro, beginScenario, setPhase, completeHotspot, collect, resetProgress }),
+    [state, inputMode, update, goTo, openIntro, beginScenario, setPhase, completeHotspot, collect, resetProgress],
   );
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
