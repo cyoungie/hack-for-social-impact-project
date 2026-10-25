@@ -43,7 +43,6 @@ export default function Title() {
 
       <footer className="title-screen__foot">
         <span>Hack for Social Impact · UNCCD Challenge</span>
-        <span>v0.1 · ESA WorldCover / Copernicus Sentinel data</span>
       </footer>
     </main>
   );
