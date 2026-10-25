@@ -16,6 +16,9 @@ import DragSort from '../primitives/DragSort.jsx';
 import ComposeStatement from '../primitives/ComposeStatement.jsx';
 import TillerPlan from '../primitives/TillerPlan.jsx';
 import FertilizerPlan from '../primitives/FertilizerPlan.jsx';
+import RiskMap from '../scenarios/typhoon/RiskMap.jsx';
+import RepairFund from '../scenarios/typhoon/RepairFund.jsx';
+import MeetingVote from '../scenarios/typhoon/MeetingVote.jsx';
 import KnowledgeCard from './KnowledgeCard.jsx';
 
 const PRIMITIVES = {
@@ -27,6 +30,9 @@ const PRIMITIVES = {
   compose: ComposeStatement,
   till: TillerPlan,
   fertilizer: FertilizerPlan,
+  riskmap: RiskMap,
+  fund: RepairFund,
+  meeting: MeetingVote,
 };
 
 const VERDICT = { correct: 'Good call', ok: 'Partly there', wrong: 'Not quite' };
@@ -85,6 +91,50 @@ function OneSystemFrame({ onClose }) {
 }
 
 // Gameplay for a built scenario, mounted inside GameScene. Phases: explore -> consequence -> card.
+function RuleCard({ rule, onClose }) {
+  return (
+    <Dialog labelledBy="rule-title" onClose={onClose}>
+      <div className="kcard__eyebrow">
+        <span className="label">Documented</span>
+        <button type="button" className="hdialog__close" onClick={onClose}>
+          Close
+        </button>
+      </div>
+      <h2 id="rule-title" className="kcard__title">
+        {rule.title}
+      </h2>
+      <p className="caption">{rule.intro}</p>
+      {rule.lines.map((l) => (
+        <p key={l} className="rule__line">
+          {l}
+        </p>
+      ))}
+      <table className="rule__coef">
+        <caption className="label">Coefficients</caption>
+        <tbody>
+          {rule.coefficients.map(([name, v, src]) => (
+            <tr key={name}>
+              <th scope="row">{name}</th>
+              <td>{v}</td>
+              <td>{src}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ul className="kcard__links">
+        {rule.sources.map((l) => (
+          <li key={l.href}>
+            <a href={l.href} target="_blank" rel="noopener noreferrer">
+              {l.label}
+              <Icon name="external" size={14} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </Dialog>
+  );
+}
+
 export default function ScenarioRunner({ scenario: sc, content }) {
   const { state, setPhase, completeHotspot, collect, goTo } = useGame();
   const { run } = state;
@@ -92,11 +142,19 @@ export default function ScenarioRunner({ scenario: sc, content }) {
   const [openId, setOpenId] = useState(null);
   const [result, setResult] = useState(null);
   const [frame, setFrame] = useState(null);
+  const [ruleOpen, setRuleOpen] = useState(false);
+  const [finaleSeen, setFinaleSeen] = useState(false);
   const [recent, setRecent] = useState(null);
   const [pos, setPos] = useState({ x: 50, y: 92 });
   const timer = useRef(null);
 
   const done = run.done;
+  // Sequential scenarios unlock each stop once the one before it is done.
+  const waiting = (h) => {
+    if (!sc.sequential) return false;
+    const i = sc.hotspots.indexOf(h);
+    return i > 0 && !done[sc.hotspots[i - 1].id];
+  };
   const totals = useMemo(() => sumPoints(Object.values(done).map((d) => d.points)), [done]);
   const allDone = sc.hotspots.every((h) => done[h.id]);
   const open = sc.hotspots.find((h) => h.id === openId);
@@ -154,7 +212,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
                   type="button"
                   className={`hotspot-area ${done[h.id] ? 'is-done' : ''} ${h.labelBelow ? 'is-label-below' : ''}`}
                   style={{ left: `${h.box.x}%`, top: `${h.box.y}%`, width: `${h.box.w}%`, height: `${h.box.h}%` }}
-                  disabled={run.phase !== 'explore' || Boolean(done[h.id])}
+                  disabled={run.phase !== 'explore' || Boolean(done[h.id]) || waiting(h)}
                   onClick={() => visit(h)}
                 >
                   <span className="hotspot-area__label">
@@ -168,7 +226,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
                   type="button"
                   className={`hotspot ${done[h.id] ? 'is-done' : ''}`}
                   style={{ left: `${h.x}%`, top: `${h.y}%` }}
-                  disabled={run.phase !== 'explore' || Boolean(done[h.id])}
+                  disabled={run.phase !== 'explore' || Boolean(done[h.id]) || waiting(h)}
                   onClick={() => visit(h)}
                 >
                   <span className="hotspot__icon">
@@ -248,6 +306,11 @@ export default function ScenarioRunner({ scenario: sc, content }) {
             </div>
           </PixelCard>
 
+          {sc.ruleCard && (
+            <button type="button" className="pbtn pbtn--ghost pbtn--block rule-btn" onClick={() => setRuleOpen(true)}>
+              Open the rule
+            </button>
+          )}
           {run.phase === 'explore' && allDone && (
             <PixelButton className="pbtn--block" onClick={() => setPhase('consequence')}>
               See how it turns out
@@ -282,6 +345,18 @@ export default function ScenarioRunner({ scenario: sc, content }) {
               <p className="label">{VERDICT[result.verdict]}</p>
               <p>{result.feedback}</p>
               <PointChips points={result.points} emptyText="No change to the bars." />
+              {result.links && (
+                <ul className="kcard__links feedback__links">
+                  {result.links.map((l) => (
+                    <li key={l.href}>
+                      <a href={l.href} target="_blank" rel="noopener noreferrer">
+                        {l.label}
+                        <Icon name="external" size={14} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
               {result.compare && (
                 <div className="compare">
                   <p className="label">Compare · the other choice</p>
@@ -299,6 +374,21 @@ export default function ScenarioRunner({ scenario: sc, content }) {
       )}
 
       {frame === 'oneSystem' && <OneSystemFrame onClose={() => setFrame(null)} />}
+
+      {ruleOpen && sc.ruleCard && <RuleCard rule={sc.ruleCard} onClose={() => setRuleOpen(false)} />}
+
+      {run.phase === 'consequence' && sc.Finale && !finaleSeen && (
+        <Dialog labelledBy="finale-title" className="hdialog hdialog--wide">
+          <div className="kcard__eyebrow">
+            <span className="label">Five years, replayed</span>
+          </div>
+          <h2 id="finale-title" className="hdialog__prompt">
+            The whole recovery, together
+          </h2>
+          <sc.Finale done={done} />
+          <PixelButton onClick={() => setFinaleSeen(true)}>Continue</PixelButton>
+        </Dialog>
+      )}
 
       {run.phase === 'card' && (
         <KnowledgeCard

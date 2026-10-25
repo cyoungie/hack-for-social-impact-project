@@ -4080,3 +4080,317 @@ button.path__node:active {
 
 .fs-tread { fill: var(--ink); }
 .fs-rim { fill: color-mix(in srgb, var(--faint) 45%, var(--ink)); }
+
+/* ---------- Scenario 2 · wide dialogs ---------- */
+.hdialog:has(.riskmap),
+.hdialog:has(.fund__list),
+.hdialog:has(.ystrip),
+.hdialog:has(.meeting),
+.hdialog--wide {
+  width: min(1180px, 100%);
+}
+
+.rule-btn {
+  margin: 0;
+  font-size: 16px;
+  padding: 10px 16px;
+}
+
+.feedback__links {
+  margin: 0;
+}
+
+/* Village map */
+.vmap {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 2px solid var(--ink);
+  background: var(--panel);
+}
+.vm-contour { fill: none; stroke: var(--wood); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.6; }
+.vm-slope text, .vm-label { font-family: var(--font-pixel); font-size: 9px; letter-spacing: 0.06em; fill: var(--ink); }
+.vm-label--light { fill: var(--bg); }
+.vm-bank { fill: none; stroke: color-mix(in srgb, var(--veg) 70%, var(--ink)); stroke-linecap: square; }
+.vm-concrete { fill: none; stroke: color-mix(in srgb, var(--faint) 70%, var(--bg)); stroke-width: 26; }
+.vm-river { fill: none; stroke: var(--water); stroke-width: 14; }
+.vm-observed { fill: var(--water); opacity: 0.38; stroke: var(--water); stroke-width: 2; }
+.vm-bigger { fill: var(--water); opacity: 0.18; stroke: var(--water); stroke-width: 2; stroke-dasharray: 6 4; }
+.vm-flood { fill: var(--water); }
+.vm-road { fill: color-mix(in srgb, var(--faint) 55%, var(--ink)); }
+.vm-bridge { fill: var(--wood); stroke: var(--ink); stroke-width: 1.5; }
+.vm-bridge.is-raised { fill: var(--postcard); }
+.vm-school { fill: var(--postcard); stroke: var(--ink); stroke-width: 1.5; }
+.vm-house__body { fill: var(--postcard); stroke: var(--ink); stroke-width: 1.5; }
+.vm-house__roof { fill: color-mix(in srgb, var(--danger) 60%, var(--wood)); stroke: var(--ink); stroke-width: 1.5; }
+.vm-stilts rect { fill: var(--wood); }
+.vm-slab-old { fill: color-mix(in srgb, var(--veg) 60%, var(--panel)); stroke: var(--ink); stroke-width: 1; stroke-dasharray: 3 2; }
+.vm-tag { stroke: var(--ink); stroke-width: 1.5; }
+.vm-tag--risk { fill: var(--risk-severe); }
+.vm-tag--safe { fill: var(--select); }
+.vm-tag__txt { font-family: var(--font-pixel); font-size: 7px; font-weight: 700; fill: var(--ink); }
+
+/* Risk map */
+.riskmap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 18px;
+}
+.riskmap__map { position: relative; }
+.riskmap__house {
+  position: absolute;
+  width: 6%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: transparent;
+  border: 2px dashed transparent;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.riskmap__house:hover,
+.riskmap__house.is-target {
+  border-color: var(--ink);
+  background: rgba(255, 217, 94, 0.35);
+}
+.riskmap__side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.riskmap__toggles,
+.riskmap__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.riskmap__notes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.riskmap__notes .label { font-size: 10px; color: var(--ink); }
+.token--risk { background: var(--risk-severe); }
+.token--safe { background: var(--select); }
+
+/* Repair fund */
+.fund__tray {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+}
+.fund__coins { display: inline-flex; gap: 6px; }
+.coin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: var(--tag);
+  border: var(--border);
+  border-radius: 50%;
+  box-shadow: 0 3px 0 var(--ink);
+  cursor: grab;
+}
+.coin.is-picked { outline: 3px dashed var(--accent); outline-offset: 3px; }
+.fund__msg { font-size: 13px; color: var(--danger); }
+.fund__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.approach { display: flex; flex-direction: column; gap: 4px; }
+.approach__main {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  padding: 10px 12px;
+  text-align: left;
+  background: var(--bg);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+.approach__main.is-target { outline: 3px dashed var(--accent); outline-offset: 2px; }
+.approach.is-on .approach__main { background: var(--select); box-shadow: 4px 4px 0 var(--ink); cursor: default; }
+.approach__cost { display: inline-flex; gap: 2px; align-items: center; color: var(--gold); }
+.approach__label { font-family: var(--font-pixel); font-weight: 700; font-size: 14px; }
+.approach__term {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: var(--muted);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 120ms linear;
+}
+.approach__term .label { font-size: 10px; color: var(--deep); }
+.approach__main:hover .approach__term,
+.approach__main:focus-visible .approach__term,
+.approach.is-on .approach__term { max-height: 60px; }
+.approach__icons {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+}
+.approach__icons span { display: inline-flex; align-items: center; gap: 6px; }
+.approach__undo {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--deep);
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  text-transform: uppercase;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.fund__strips { display: grid; grid-template-columns: 1fr; gap: 18px; }
+.fund__strips.is-compare { grid-template-columns: 1fr 1fr; }
+.fund__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* Year strips */
+.ystrip { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ystrip__title { font-size: 12px; }
+.ystrip__years { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.yframe {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 10px;
+  padding: 8px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  animation: fade-in 200ms ease-out both;
+}
+.yframe.is-storm { background: color-mix(in srgb, var(--water) 16%, var(--cream)); }
+.yframe__map { position: relative; }
+.yframe__year {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  padding: 1px 5px;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.yframe__body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.yframe__line { font-size: 12px; line-height: 1.4; }
+.ybars { display: flex; flex-direction: column; gap: 3px; }
+.ybar { display: grid; grid-template-columns: 16px 1fr 26px; align-items: center; gap: 6px; }
+.ybar__track { height: 9px; border: 1.5px solid var(--ink); background: var(--bg); }
+.ybar__fill { display: block; height: 100%; }
+.ybar__num { font-family: var(--font-pixel); font-size: 11px; font-weight: 700; text-align: right; }
+.ystrip__summary {
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 2px dashed var(--ink);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+/* Meeting vote */
+.meeting { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; }
+.meeting__side { display: flex; flex-direction: column; gap: 12px; }
+.meeting__houses { display: flex; flex-wrap: wrap; gap: 6px; }
+.token.is-placed { background: var(--select); }
+.meeting__where { font-family: var(--font-body); font-weight: 400; font-size: 12px; }
+.meeting__spots { display: flex; flex-direction: column; gap: 8px; }
+.meeting__spot {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  padding: 10px 12px;
+  text-align: left;
+  background: var(--bg);
+  border: var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.meeting__spot.is-target { outline: 3px dashed var(--accent); outline-offset: 2px; }
+.meeting__spot .caption { grid-column: 1; font-size: 12px; }
+.meeting__count { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-family: var(--font-pixel); font-weight: 700; font-size: 22px; }
+
+/* Rule card */
+.rule__line { font-size: 14px; }
+.rule__coef { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rule__coef caption { text-align: left; padding-bottom: 4px; }
+.rule__coef th, .rule__coef td { padding: 4px 6px; border-bottom: 1px solid var(--panel); text-align: left; }
+.rule__coef th { font-weight: 600; }
+
+/* ---------- River village illustration (Scenario 2) ---------- */
+.rs-sky { fill: color-mix(in srgb, var(--faint) 30%, var(--cloud)); }
+.rs-cloud rect { fill: color-mix(in srgb, var(--faint) 55%, var(--bg)); }
+.rs-forest { fill: color-mix(in srgb, var(--veg) 50%, var(--ink)); }
+.rs-savanna { fill: color-mix(in srgb, var(--soil) 75%, var(--wood)); }
+.rs-savanna.is-planted { fill: color-mix(in srgb, var(--soil) 45%, var(--veg)); }
+.rs-sapling rect { fill: var(--veg); stroke: var(--ink); stroke-width: 2; }
+.rs-hill { fill: color-mix(in srgb, var(--veg) 70%, var(--panel)); }
+.rs-school { fill: var(--postcard); stroke: var(--ink); stroke-width: 4; }
+.rs-school-roof { fill: color-mix(in srgb, var(--water) 60%, var(--ink)); stroke: var(--ink); stroke-width: 4; }
+.rs-ground { fill: color-mix(in srgb, var(--veg) 45%, var(--soil)); }
+.rs-mud rect { fill: color-mix(in srgb, var(--soil) 70%, var(--wood)); }
+.rs-bank rect { fill: color-mix(in srgb, var(--veg) 60%, var(--ink)); }
+.rs-bank.is-planted rect { fill: color-mix(in srgb, var(--veg) 85%, var(--ink)); }
+.rs-bank.is-concrete rect { fill: color-mix(in srgb, var(--faint) 60%, var(--bg)); stroke: var(--ink); stroke-width: 3; }
+.rs-river rect { fill: color-mix(in srgb, var(--water) 60%, var(--soil)); }
+.rs-road { fill: color-mix(in srgb, var(--faint) 50%, var(--ink)); }
+.rs-bridge rect { fill: var(--wood); stroke: var(--ink); stroke-width: 3; }
+.rs-bridge.is-raised rect { fill: color-mix(in srgb, var(--faint) 40%, var(--bg)); }
+.rs-bridge .rs-rail { fill: var(--ink); }
+.rs-pier { fill: color-mix(in srgb, var(--faint) 60%, var(--ink)) !important; }
+.rs-logs rect { fill: color-mix(in srgb, var(--wood) 70%, var(--ink)); stroke: var(--ink); stroke-width: 2; }
+.rs-pole rect, .rs-pole path:not(.rs-wire) { fill: color-mix(in srgb, var(--wood) 60%, var(--ink)); }
+.rs-wire { fill: none; stroke: var(--ink); stroke-width: 3; }
+.rs-gauge rect { fill: var(--postcard); stroke: var(--ink); stroke-width: 2; }
+.rs-gauge .rs-waterline { fill: var(--water); stroke: none; }
+.rs-wall { fill: color-mix(in srgb, var(--wood) 55%, var(--soil)); stroke: var(--ink); stroke-width: 4; }
+.rs-plank { fill: color-mix(in srgb, var(--wood) 80%, var(--ink)); }
+.rs-door { fill: color-mix(in srgb, var(--wood) 80%, var(--ink)); stroke: var(--ink); stroke-width: 3; }
+.rs-window { fill: color-mix(in srgb, var(--water) 30%, var(--bg)); stroke: var(--ink); stroke-width: 3; }
+.rs-rafter rect { fill: var(--wood); stroke: var(--ink); stroke-width: 2; }
+.rs-rafter .rs-tarp { fill: var(--water); }
+.rs-roof rect { fill: color-mix(in srgb, var(--danger) 55%, var(--wood)); stroke: var(--ink); stroke-width: 4; }
+.rs-post rect, .rs-post { fill: var(--wood); }
+.rs-slab { fill: color-mix(in srgb, var(--faint) 50%, var(--bg)); stroke: var(--ink); stroke-width: 2; }
+.rs-tag { stroke: var(--ink); stroke-width: 3; }
+.rs-tag--risk { fill: var(--risk-severe); }
+.rs-tag--safe { fill: var(--select); }
+.rs-tag__txt { font-family: var(--font-pixel); font-size: 13px; font-weight: 700; fill: var(--ink); }
+.rs-skin { fill: color-mix(in srgb, var(--soil) 60%, var(--postcard)); }
+.rs-legs { fill: var(--ink); }
+.rs-debris rect { fill: color-mix(in srgb, var(--wood) 75%, var(--faint)); stroke: var(--ink); stroke-width: 2; }
+.rs-debris .rs-metal { fill: color-mix(in srgb, var(--faint) 70%, var(--bg)); }
+.rs-scorch { fill: color-mix(in srgb, var(--ink) 85%, var(--wood)); opacity: 0.85; }
+.rs-chips rect { fill: color-mix(in srgb, var(--tag) 55%, var(--soil)); stroke: var(--ink); stroke-width: 2; }
+.rs-board > rect:not(.rs-post):not(.rs-paper) { fill: var(--wood); stroke: var(--ink); stroke-width: 3; }
+.rs-paper { fill: var(--postcard); }
+.rs-bay--brown { fill: color-mix(in srgb, var(--soil) 70%, var(--wood)); }
+.rs-bay--murky { fill: color-mix(in srgb, var(--water) 55%, var(--soil)); }
+.rs-bay--blue { fill: color-mix(in srgb, var(--water) 85%, #1d4c78); }
+.rs-wave rect { fill: var(--cloud); opacity: 0.6; }
+.rs-reef rect { fill: color-mix(in srgb, var(--people) 55%, var(--danger)); }
+.rs-reef.is-grey rect { fill: color-mix(in srgb, var(--faint) 55%, var(--soil)); }
+.rs-spoil { fill: color-mix(in srgb, var(--soil) 80%, var(--wood)); stroke: var(--ink); stroke-width: 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .yframe { animation: none; }
+  .approach__term { transition: none; }
+}

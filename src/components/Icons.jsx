@@ -253,6 +253,19 @@ const PATHS = {
     </>
   ),
   drop: <path d="M12 3l6 9a6 6 0 0 1-12 0z" />,
+  people: (
+    <>
+      <rect x="5" y="4" width="5" height="5" />
+      <rect x="14" y="4" width="5" height="5" />
+      <path d="M3 20v-7h9v7M12 20v-7h9v7" />
+    </>
+  ),
+  coin: (
+    <>
+      <rect x="5" y="5" width="14" height="14" rx="3" />
+      <path d="M12 8v8M9 10h6M9 14h6" />
+    </>
+  ),
   cloud: <path d="M5 18h13a3 3 0 0 0 0-6 5 5 0 0 0-9-1 4 4 0 0 0-4 7z" />,
   storm: (
     <>

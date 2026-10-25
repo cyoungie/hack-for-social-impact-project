@@ -3,10 +3,14 @@
   "title": "Typhoon",
   "location": "River",
   "background": "/scenes/scene2.png",
-  "persona": { "name": "Nina", "sprite": "/sprites/persona2.png", "tint": "#A78BFA" },
+  "persona": {
+    "name": "Nina",
+    "sprite": "/sprites/persona2.png",
+    "tint": "#A78BFA"
+  },
   "intro": [
-    "Hey — I'm Nina. My village sits right where the river bends.",
-    "Last typhoon, the river came up into Grandma's kitchen, and the mud never really left.",
-    "The next storm is coming whether we're ready or not. Help me get the village ready before it does."
+    "Are you new around here? A typhoon came through two nights ago. We were able to stay safe, but look at the damage!",
+    "I’m Nina, by the way, and my 2 kids and mother are still staying at the shelter. Everyone keeps saying the next storm will be worse.",
+    "Help me figure out what this village should do before it comes."
   ]
 }
