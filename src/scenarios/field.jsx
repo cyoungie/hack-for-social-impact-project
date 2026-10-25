@@ -1,8 +1,5 @@
 import { Mark, Trace } from './stageKit.jsx';
 
-const NRCS_COVER =
-  'The USDA Natural Resources Conservation Service (NRCS) recommends keeping soil covered between crops for exactly this reason.';
-
 const TILL = {
   right:
     'Nice work. Tilling less disturbs less soil, so more of its structure, organic matter, and soil life stays intact. Following the contour lines means each furrow catches water instead of channeling it downhill. NRCS promotes both reduced tillage and contour farming to cut erosion on sloped land.',
@@ -10,17 +7,18 @@ const TILL = {
     'Not quite. The path is good, but deep tilling breaks up soil structure and leaves loose soil that heavy rain can easily carry away. NRCS recommends tilling as little as possible, or skipping tillage entirely where the crop allows.',
   badPath:
     'Not quite. The depth is good, but furrows running downhill act like gutters, speeding up runoff toward the stream. NRCS recommends tilling along the contour so each row slows the water down.',
+  // Both wrong: the depth point and the path point, combined into one message.
   both:
-    'Not quite. Deep tilling breaks up soil structure and leaves loose soil that heavy rain can easily carry away — and furrows running downhill act like gutters, speeding up runoff toward the stream. NRCS recommends tilling as little as possible, and along the contour so each row slows the water down.',
+    'Not quite. Deep tilling breaks up soil structure and leaves loose soil that heavy rain can easily carry away, and furrows running downhill act like gutters, speeding up runoff toward the stream. NRCS recommends tilling as little as possible, or skipping tillage entirely where the crop allows, and tilling along the contour so each row slows the water down.',
 };
 
 // Scenario #1 (Help a Business Owner): Heavy Soil Erosion
 export default {
   id: 'field',
   plate: 'HEAVY SOIL EROSION · COUNTRYSIDE · 1 OF 5',
-  persona: { name: 'Tun Jack', role: 'Sweet potato farmer, countryside' },
+  persona: { name: 'Jack', role: 'Runs a small farm outside the main town' },
   closing:
-    "Cover between plantings, till light and across the hill, and watch the sky before the fertilizer goes down. My father would have called that common sense. I'm calling it the plan.",
+    "Cover the field between plantings, till less and along the contour, and check the forecast before fertilizing. That's how I farm from now on.",
 
   blocks: [
     { tone: 'sky', x: 0, y: 0, w: 100, h: 26 },
@@ -56,7 +54,7 @@ export default {
       y: 57,
       kind: 'choice',
       prompt:
-        'Many tropical islands time their crop rotations around the wet and dry seasons. Help Tun Jack choose how to manage the field between plantings:',
+        'Many tropical islands time their crop rotations around the wet and dry seasons. Help Jack choose how to manage the field between plantings:',
       config: {
         options: [
           {
@@ -64,7 +62,8 @@ export default {
             correct: true,
             label: 'Cover the field with mulch',
             points: { soil: 5, water: 2 },
-            feedback: `Good call. Mulch acts like a shield, taking the impact of heavy rain so it doesn't break up and carry off the topsoil. ${NRCS_COVER}`,
+            feedback:
+              "Good call. Mulch acts like a shield, taking the impact of heavy rain so it doesn't break up and carry off the topsoil. The USDA Natural Resources Conservation Service (NRCS) recommends keeping soil covered between crops for exactly this reason.",
           },
           {
             id: 'bare',
@@ -78,7 +77,8 @@ export default {
             correct: true,
             label: 'Seed the field with cover crops',
             points: { soil: 5, veg: 3 },
-            feedback: `Good call. Cover crops protect the surface, and their roots hold soil in place. Some, like legumes, even add nitrogen for the next crop. ${NRCS_COVER}`,
+            feedback:
+              'Good call. Cover crops protect the surface, and their roots hold soil in place. Some, like legumes, even add nitrogen for the next crop. The USDA Natural Resources Conservation Service (NRCS) recommends keeping soil covered between crops for exactly this reason.',
           },
         ],
       },
@@ -90,13 +90,13 @@ export default {
       x: 11,
       y: 70,
       kind: 'till',
-      prompt: "Tun Jack needs to prepare the field for the next planting. Set the tiller's depth, then drive the tractor across the field to till it.",
+      prompt: "Jack needs to prepare the field for the next planting. Set the tiller's depth, then drive the tractor across the field to till it.",
       config: {
         startDepth: 2,
         depths: [
-          { id: 'none', label: 'No-till', sub: '0 in', reach: 0, ok: true, note: 'Tines up. The old crop residue stays as cover.' },
-          { id: 'shallow', label: 'Shallow', sub: '2–4 in', reach: 22, ok: true, note: 'Tines skim the top of the topsoil.' },
-          { id: 'deep', label: 'Deep', sub: '8–12 in', reach: 92, ok: false, note: 'How it was set last season: tines tear down into the subsoil.' },
+          { id: 'none', label: 'No-till', sub: '0 in', reach: 0, ok: true },
+          { id: 'shallow', label: 'Shallow', sub: '2–4 in', reach: 22, ok: true },
+          { id: 'deep', label: 'Deep', sub: '8–12 in', reach: 92, ok: false },
         ],
         results: {
           right: { points: { soil: 6, water: 2 }, feedback: TILL.right },
@@ -114,7 +114,7 @@ export default {
       y: 12,
       kind: 'fertilizer',
       prompt:
-        'The rainy season is starting, and Tun Jack needs to fertilize the young crops this week. Check the forecast and pick the best day to apply fertilizer.',
+        'The rainy season is starting, and Jack needs to fertilize the young crops this week. Check the forecast and pick the best day to apply fertilizer.',
       config: {
         days: [
           { id: 'mon', label: 'Mon', icon: 'sunny', wx: 'Sunny', rain: 0, rainLabel: '0 in' },
@@ -200,9 +200,10 @@ export default {
 
   card: {
     title: { good: 'You kept the topsoil on the hill', bad: 'The best soil is still in the stream' },
-    fact: 'Topsoil takes centuries to form and one storm to lose. Keeping fields covered between crops, tilling less and along the contour, and timing fertilizer around heavy rain are core USDA NRCS conservation practices — and on an island, the soil and nutrients that leave a farm end up on the reef.',
-    source: 'USDA NRCS conservation practices: cover crops, mulching, reduced tillage, contour farming, nutrient management',
-    actionLabel: 'Talk to the island’s farm advisors — free help for growers',
+    // Only lines from the scenario script.
+    fact: "Mulch acts like a shield, taking the impact of heavy rain so it doesn't break up and carry off the topsoil. Tilling less disturbs less soil, so more of its structure, organic matter, and soil life stays intact. Following the contour lines means each furrow catches water instead of channeling it downhill. A light rain after fertilizing helps work nutrients into the soil, but a heavy storm would wash them off the field.",
+    source: 'USDA Natural Resources Conservation Service (NRCS)',
+    actionLabel: 'Soil conservation resources',
     actions: [
       { label: 'UOG Cooperative Extension', href: 'https://www.uog.edu/extension/' },
       { label: 'Guam Department of Agriculture', href: 'https://doag.guam.gov/' },

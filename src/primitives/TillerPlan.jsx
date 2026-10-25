@@ -116,7 +116,7 @@ export default function TillerPlan({ config, onComplete }) {
               ))}
             </svg>
           </div>
-          <p className="caption">{depth.note}</p>
+          {depth.note && <p className="caption">{depth.note}</p>}
         </section>
 
         <section className="till__step">
@@ -181,7 +181,7 @@ export default function TillerPlan({ config, onComplete }) {
                 ? 'Path: across the slope, following the contour lines.'
                 : path === 'downhill'
                   ? 'Path: straight up and down the slope.'
-                  : 'Contour lines connect points at the same height.'}
+                  : 'Drag the tractor across the field to till it.'}
           </p>
         </section>
       </div>
