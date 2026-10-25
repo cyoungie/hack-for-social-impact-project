@@ -3,10 +3,14 @@
   "title": "Heavy Soil Erosion",
   "location": "Countryside",
   "background": "/scenes/scene1.png",
-  "persona": { "name": "Tun Jack", "sprite": "/sprites/persona1.png", "tint": "#C8965A" },
+  "persona": {
+    "name": "Tun Jack",
+    "sprite": "/sprites/persona1.png",
+    "tint": "#C8965A"
+  },
   "intro": [
-    "You're the new planner? Good. Come stand in this field with me a minute.",
-    "Every big storm, the rain runs off bare dirt and takes the topsoil with it — down the gullies and into the river.",
-    "My father's field was dark soil to your knee. Now it's red clay at my ankle. Help me keep what's left."
+    "Oh, thank goodness you're here! My name is Tun Jack, and I run a small farm just outside the main town. Last rainy season, a string of heavy storms rolled in right after I'd plowed. The rain ran straight down my rows and carried off the topsoil, and by the time the skies cleared, the best soil on my land was sitting at the bottom of the stream.",
+    "Since then, my crops just haven't taken. It's put me in a real bind, and I never want to be caught off guard like this again.",
+    "Will you help me rethink how I farm, so the next big storm doesn't wash everything away?"
   ]
 }

@@ -1,10 +1,11 @@
+import field from './field.jsx';
 import coast from './coast.jsx';
 import lens from './lens.jsx';
 import industry from './industry.jsx';
 import { PROBLEMS } from '../data/game.js';
 
-// Built scenarios by map slot id. Slots 1–2 (field, ridge) arrive with the team's scenario draft.
-export const SCENARIOS = { coast, lens, industry };
+// Built scenarios by map slot id. Slot 2 (ridge) arrives with the team's scenario draft.
+export const SCENARIOS = { field, coast, lens, industry };
 
 export const isBuilt = (id) => Boolean(SCENARIOS[id]);
 

@@ -238,6 +238,28 @@ const PATHS = {
       <path d="M12 15V3l6 9h-6" />
     </>
   ),
+  tractor: (
+    <>
+      <rect x="3" y="11" width="11" height="6" />
+      <path d="M6 11V6h6v5M14 13h5l2 4h-4" />
+      <rect x="4" y="16" width="5" height="5" />
+      <rect x="16" y="17" width="4" height="4" />
+    </>
+  ),
+  bag: (
+    <>
+      <path d="M6 7h12l1 14H5z" />
+      <path d="M8 7V4h8v3M9 13h6" />
+    </>
+  ),
+  drop: <path d="M12 3l6 9a6 6 0 0 1-12 0z" />,
+  cloud: <path d="M5 18h13a3 3 0 0 0 0-6 5 5 0 0 0-9-1 4 4 0 0 0-4 7z" />,
+  storm: (
+    <>
+      <path d="M5 13h13a3 3 0 0 0 0-6 5 5 0 0 0-9-1 4 4 0 0 0-4 7z" />
+      <path d="M12 14l-2 4h4l-2 4M7 16l-1 3M17 16l-1 3" />
+    </>
+  ),
   home: (
     <>
       <path d="M3 11l9-7 9 7" />

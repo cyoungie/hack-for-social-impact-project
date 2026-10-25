@@ -14,6 +14,8 @@ import ForecastStrip from '../primitives/ForecastStrip.jsx';
 import TimedGrab from '../primitives/TimedGrab.jsx';
 import DragSort from '../primitives/DragSort.jsx';
 import ComposeStatement from '../primitives/ComposeStatement.jsx';
+import TillerPlan from '../primitives/TillerPlan.jsx';
+import FertilizerPlan from '../primitives/FertilizerPlan.jsx';
 import KnowledgeCard from './KnowledgeCard.jsx';
 
 const PRIMITIVES = {
@@ -23,6 +25,8 @@ const PRIMITIVES = {
   grab: TimedGrab,
   sort: DragSort,
   compose: ComposeStatement,
+  till: TillerPlan,
+  fertilizer: FertilizerPlan,
 };
 
 const VERDICT = { correct: 'Good call', ok: 'Partly there', wrong: 'Not quite' };
@@ -37,7 +41,8 @@ function DialogueBox({ persona, text, cta, onNext }) {
       </span>
       <div className="dialogue__body">
         <p className="dialogue__name">
-          {persona.name} · {persona.age}
+          {persona.name}
+          {persona.age ? ` · ${persona.age}` : ''}
         </p>
         <p>{text}</p>
       </div>
@@ -125,7 +130,11 @@ export default function ScenarioRunner({ scenario: sc, content }) {
       <main className="scenario">
         <div className="scenario__main">
           <section className="stage" aria-label="Scene">
-            <Scenery src={content.background} blocks={sc.blocks} swap={showOutcome ? sc.consequence[outcome].swap : {}} />
+            <Scenery
+              src={content.background}
+              blocks={sc.blocks}
+              swap={{ ...sc.liveSwap?.(done), ...(showOutcome ? sc.consequence[outcome].swap : {}) }}
+            />
             <div className="stage__overlays">{sc.overlays(done)}</div>
 
             {!showOutcome &&
@@ -183,7 +192,8 @@ export default function ScenarioRunner({ scenario: sc, content }) {
             </span>
             <span>
               <span className="mini-nina__name">
-                {persona.name} · {persona.age}
+                {persona.name}
+                {persona.age ? ` · ${persona.age}` : ''}
               </span>
               <span className="mini-nina__quote">{persona.role}</span>
             </span>

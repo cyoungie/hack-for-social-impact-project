@@ -3651,3 +3651,266 @@ button.path__node:active {
   inset: 0;
   pointer-events: none;
 }
+
+/* ---------- Scenario 1 · farm scenery ---------- */
+.blk--sky { background: color-mix(in srgb, var(--sky) 45%, var(--bg)); }
+.blk--field-tilled,
+.blk--field-mulch,
+.blk--field-seedlings,
+.blk--field-bare,
+.blk--field-contour,
+.blk--field-furrows {
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-sm);
+}
+.blk--field-tilled {
+  background-color: color-mix(in srgb, var(--soil) 70%, var(--wood));
+  background-image: repeating-linear-gradient(0deg, transparent 0 14px, rgba(30, 42, 34, 0.18) 14px 17px);
+}
+.blk--field-mulch {
+  background-color: color-mix(in srgb, var(--tag) 55%, var(--soil));
+  background-image: repeating-linear-gradient(35deg, transparent 0 6px, rgba(138, 90, 46, 0.35) 6px 8px);
+}
+.blk--field-seedlings {
+  background-color: color-mix(in srgb, var(--soil) 60%, var(--wood));
+  background-image: radial-gradient(var(--veg) 4px, transparent 4px);
+  background-size: 22px 18px;
+}
+.blk--field-bare {
+  background-color: color-mix(in srgb, var(--soil) 75%, var(--wood));
+  background-image: repeating-linear-gradient(90deg, transparent 0 26px, rgba(91, 168, 224, 0.55) 26px 29px);
+  background-size: 100% 40px;
+  animation: rivulets 1.4s steps(4) infinite;
+}
+@keyframes rivulets {
+  to {
+    background-position: 0 40px;
+  }
+}
+.blk--field-contour {
+  background-color: color-mix(in srgb, var(--soil) 55%, var(--veg));
+  background-image: repeating-linear-gradient(176deg, transparent 0 12px, rgba(30, 42, 34, 0.25) 12px 15px);
+}
+.blk--field-furrows {
+  background-color: color-mix(in srgb, var(--soil) 75%, var(--wood));
+  background-image: repeating-linear-gradient(90deg, transparent 0 12px, rgba(30, 42, 34, 0.4) 12px 17px);
+}
+.blk--stream-muddy { background: color-mix(in srgb, var(--soil) 85%, var(--wood)); }
+.trace--plume line { stroke: var(--veg); stroke-width: 6; opacity: 0.8; }
+
+/* ---------- Tiller plan (depth + path) ---------- */
+.hdialog:has(.till),
+.hdialog:has(.fert__tokens) {
+  width: min(860px, 100%);
+}
+
+.till {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 18px;
+}
+
+.till__step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+}
+
+.till__depth {
+  display: grid;
+  grid-template-columns: 34px auto 1fr;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.vslider {
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  width: 30px;
+  height: 160px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.vslider::-webkit-slider-runnable-track {
+  box-sizing: border-box;
+  width: 16px;
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.vslider::-moz-range-track {
+  box-sizing: border-box;
+  width: 16px;
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.vslider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  margin-left: -10px;
+  background: var(--accent);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.vslider::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  background: var(--accent);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.till__stops {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.till__stops li {
+  display: flex;
+  flex-direction: column;
+  color: var(--muted);
+}
+
+.till__stops li.is-on {
+  color: var(--ink);
+}
+
+.till__stop-name {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.till__stop-sub {
+  font-size: 12px;
+}
+
+.xsection {
+  width: 100%;
+  max-width: 140px;
+  height: 160px;
+  border: 2px solid var(--ink);
+  background: color-mix(in srgb, var(--sky) 30%, var(--bg));
+}
+
+.xs__top { fill: color-mix(in srgb, var(--soil) 75%, var(--wood)); }
+.xs__mid { fill: color-mix(in srgb, var(--soil) 55%, var(--wood)); }
+.xs__sub { fill: color-mix(in srgb, var(--soil) 35%, var(--faint)); }
+.xs__txt { fill: var(--postcard); font-family: var(--font-pixel); font-size: 8px; letter-spacing: 0.08em; }
+.xs__bar { fill: var(--danger); stroke: var(--ink); stroke-width: 2; }
+.xs__tine { fill: var(--ink); transition: height 150ms steps(3); }
+
+.minimap {
+  width: 100%;
+  height: auto;
+  border: 2px solid var(--ink);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.mm__field { fill: color-mix(in srgb, var(--soil) 45%, var(--panel)); }
+.mm__contour { fill: none; stroke: var(--wood); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.mm__stream { fill: var(--water); }
+.mm__txt { fill: var(--ink); font-family: var(--font-pixel); font-size: 10px; letter-spacing: 0.08em; }
+.mm__strip {
+  fill: none;
+  stroke: var(--wood);
+  stroke-width: 10;
+  stroke-linejoin: round;
+  opacity: 0.75;
+}
+.mm__strip.is-bad { stroke: color-mix(in srgb, var(--soil) 60%, var(--danger)); }
+.mm__tractor rect { fill: var(--danger); stroke: var(--ink); stroke-width: 2; }
+
+.till__paths {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- Fertilizer plan ---------- */
+.fert__tokens {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.token--alt {
+  background: color-mix(in srgb, var(--water) 25%, var(--bg));
+}
+
+.fday.is-storm {
+  background: color-mix(in srgb, var(--water) 45%, var(--bg));
+}
+
+.fday__rain {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.fday__drops {
+  display: flex;
+  gap: 3px;
+  min-height: 22px;
+}
+
+.fday__chip {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  background: var(--tag);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+}
+
+.fday__chip--alt {
+  background: color-mix(in srgb, var(--water) 40%, var(--bg));
+}
+
+.fday.is-playing {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+  translate: 0 -4px;
+}
+
+.fday.is-past {
+  opacity: 0.6;
+}
+
+.fert__status {
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.fert__status.is-good { background: var(--select); }
+.fert__status.is-bad { background: var(--risk-severe); }
+.fert__status.is-wait { background: var(--cream); }
+
+@media (prefers-reduced-motion: reduce) {
+  .blk--field-bare { animation: none; }
+  .xs__tine { transition: none; }
+}
