@@ -54,7 +54,7 @@ const SLOTS = [
     x: 53,
     y: 33,
     tag: 'REEF',
-    body: "Tatan Ben has fished this reef for forty years. Half of it has bleached, and some of what's killing it starts up on the land.",
+    body: 'Last year the water got too warm and the coral went white. Now every rain turns the bay brown.',
     difficulty: 2,
   },
   {

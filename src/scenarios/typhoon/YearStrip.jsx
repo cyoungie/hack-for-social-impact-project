@@ -31,7 +31,8 @@ export function Bars({ frame }) {
 }
 
 // Five years, one frame each; storms in years 2 and 4. Plays in once, then stays.
-export default function YearStrip({ title, result, plan, vote, onDone, instant = false }) {
+// renderMap(frame) draws a year's map; defaults to the river village.
+export default function YearStrip({ title, result, plan, vote, onDone, instant = false, renderMap }) {
   const [shown, setShown] = useState(() => (instant || reducedMotion() ? 5 : 1));
 
   useEffect(() => {
@@ -49,12 +50,13 @@ export default function YearStrip({ title, result, plan, vote, onDone, instant =
       <p className="label ystrip__title">{title}</p>
       <ol className="ystrip__years" aria-live="polite">
         {result.frames.slice(0, shown).map((f) => (
-          <li key={f.year} className={`yframe ${f.storm ? 'is-storm' : ''}`}>
+          <li key={f.year} className={`yframe ${f.storm ? 'is-storm' : ''} ${f.heat ? 'is-heat' : ''}`}>
             <div className="yframe__map">
-              <VillageMap frame={f} plan={plan} vote={vote} label={`Year ${f.year} map`} />
+              {renderMap ? renderMap(f) : <VillageMap frame={f} plan={plan} vote={vote} label={`Year ${f.year} map`} />}
               <span className="yframe__year">
                 Year {f.year}
-                {f.storm && ' · Storm'}
+                {f.heat && ' · Heat wave'}
+                {f.storm && (f.heat === undefined ? ' · Storm' : ' · Big storm')}
               </span>
             </div>
             <div className="yframe__body">

@@ -1,210 +1,152 @@
-import { Mark, Trace } from './stageKit.jsx';
+import { Mark } from './stageKit.jsx';
+import CoastScene from './scenes/CoastScene.jsx';
+import { COEF } from './reef/rule.js';
 
-// Scenario #3 (Help a Fisherman): Coral & Sea Life
+const DRAIN_FEEDBACK =
+  'More than 80 per cent of ocean pollution starts on land. The dirt can stay on the hill while the road gets built (UNEP). A planted basin slows the water and catches what it carries.';
+
+// Reef at the end of the plan you kept (with the drain choice).
+const finalReef = (done) => done.road?.state.finalReef;
+
+// Scenario #3 (Help a Fisherman): Coral & Sea Life. Score types fold in: Ecological -> VEG, Community/Readiness -> PEOPLE.
 export default {
   id: 'coast',
   plate: 'CORAL & SEA LIFE · COAST · 3 OF 5',
-  persona: { name: 'Tatan Ben', age: 58, role: 'Fisherman, Tumon' },
-  closing:
-    "The reef fed my father and it feeds me. Whether it feeds anybody after that — that part happens up on the land, where you're headed next.",
+  persona: { name: 'Tom', role: 'Fisherman' },
+  // One closing line in the script; the bad ending keeps only its first half, since the reef didn't recover.
+  closing: {
+    good: 'This road sure will help us get around easier and I’m glad the sea life is recovering. Thanks.',
+    bad: 'This road sure will help us get around easier.',
+  },
 
-  blocks: [
-    { tone: 'land', x: 0, y: 0, w: 100, h: 40, label: 'Tumon — from the dock' },
-    { tone: 'hill', x: 0, y: 0, w: 30, h: 18, label: 'Upstream: fields + burned hills' },
-    { tone: 'stream', x: 14, y: 18, w: 6, h: 24 },
-    { tone: 'sea', x: 0, y: 40, w: 100, h: 60 },
-    { tone: 'plume', x: 10, y: 40, w: 18, h: 14, label: 'Brown water' },
-    { tone: 'dock', x: 32, y: 32, w: 30, h: 10, label: 'Dock' },
-    { tone: 'boat', x: 70, y: 42, w: 14, h: 7, label: "Ben's boat" },
-    { id: 'reefLive', tone: 'reef-live', x: 46, y: 74, w: 24, h: 16, label: 'Live reef' },
-    { id: 'reefGrey', tone: 'reef-grey', x: 70, y: 74, w: 24, h: 16, label: 'Bleached' },
-  ],
+  Scene: CoastScene,
+  sceneState(done, outcome) {
+    const reef = finalReef(done);
+    return {
+      route: done.road?.state.route || null,
+      controls: new Set(done.road?.state.controls || []),
+      drain: done.drain?.state || null,
+      counted: done.coral ? done.coral.state.counted : null,
+      bay: outcome ? (reef >= 0.5 ? 'clear' : reef >= 0.2 ? 'murky' : 'brown') : 'brown',
+      shopClosed: outcome === 'bad',
+    };
+  },
 
   hotspots: [
     {
-      id: 'reef',
-      label: 'Grey reef patch',
+      id: 'coral',
+      label: 'The coral',
       icon: 'coral',
-      x: 82,
-      y: 70,
-      kind: 'choice',
-      prompt: "Half this reef bleached. What's doing it?",
+      x: 87,
+      y: 87,
+      box: { x: 78.5, y: 82, w: 17.5, h: 11 },
+      kind: 'coralcount',
+      prompt: 'Coral count: tap only the healthy corals in 20 seconds.',
       config: {
-        options: [
-          {
-            id: 'heat',
-            label: 'Only ocean heat — nothing to do locally',
-            feedback:
-              "The heat is real, but it's only half the story. A reef buried in sediment and algae can't bounce back after a heatwave. NOAA lists land-based pollution as a top local threat — and local is what we can change.",
-          },
-          {
-            id: 'runoff',
-            correct: true,
-            label: 'Heat PLUS the mud and nutrients washing off the land',
-            points: { veg: 5, water: 3 },
-            feedback:
-              "Right. Heatwaves bleach coral everywhere, but a reef smothered in sediment and fed excess nutrients can't recover between heatwaves. NOAA's Coral Reef Conservation Program calls land-based pollution one of the top local threats — and the local part is the part an island can fix.",
-          },
-          {
-            id: 'fish',
-            label: 'The fish ate it',
-            feedback:
-              "Fish don't bleach coral — the grazers actually help it by eating algae. Heatwaves bleach, and sediment and nutrients from the land stop the reef recovering between them. NOAA lists land-based pollution as a top local threat.",
-          },
-        ],
-      },
-    },
-    {
-      id: 'outlet',
-      label: 'Stream outlet',
-      icon: 'stream',
-      x: 19,
-      y: 47,
-      kind: 'choice',
-      prompt: 'That brown water comes down every time it rains hard. Where is it from?',
-      afterFrame: 'oneSystem',
-      config: {
-        options: [
-          {
-            id: 'hills',
-            correct: true,
-            label: 'The burned hills and bare fields upstream',
-            points: { soil: 3, veg: 5 },
-            feedback:
-              "You've seen this before — it's the same soil from the farm and the fire hills, finishing its trip. Sediment that leaves the land ends up on the reef. UOG Sea Grant plants trees along rivers like the Ugum for exactly this reason: hold the soil up there, save the coral down here.",
-          },
-          {
-            id: 'ocean',
-            label: 'The ocean stirring itself up',
-            feedback:
-              "Waves stir sand, but this water is brown before it ever reaches the bay — it's soil off the burned hills and bare fields upstream. Sediment that leaves the land ends up on the reef. Hold the soil up there, save the coral down here.",
-          },
-          {
-            id: 'boats',
-            label: 'Boats',
-            feedback:
-              "Boats churn a little, but this plume runs down the stream every hard rain — it's soil from the burned hills and bare fields upstream. Sediment that leaves the land ends up on the reef.",
-          },
-        ],
-      },
-    },
-    {
-      id: 'bucket',
-      label: 'Catch bucket',
-      icon: 'bucket',
-      x: 46,
-      y: 27,
-      kind: 'sort',
-      prompt: "Sort the morning's catch: keepers in the cooler, the rest back over the side.",
-      config: {
-        seconds: 30,
-        perCorrect: 3,
-        protectPenalty: 3,
-        hint: 'Minimum keeper size is 20 cm.',
-        bins: [
-          { id: 'keep', label: 'Cooler — keep' },
-          { id: 'release', label: 'Over the side — release' },
-        ],
-        items: [
-          { id: 'f1', label: 'Snapper', detail: '34 cm · adult', answer: 'keep' },
-          { id: 'f2', label: 'Juvenile jack', detail: '9 cm', answer: 'release', protect: true },
-          { id: 'f3', label: 'Rabbitfish', detail: '26 cm · adult', answer: 'keep' },
-          { id: 'f4', label: 'Parrotfish', detail: 'Reef grazer', answer: 'release', protect: true },
-          { id: 'f5', label: 'Goatfish', detail: '24 cm · adult', answer: 'keep' },
-          { id: 'f6', label: 'Grouper', detail: 'Carrying eggs', answer: 'release' },
-          { id: 'f7', label: 'Juvenile snapper', detail: '11 cm', answer: 'release', protect: true },
-          { id: 'f8', label: 'Emperor', detail: '31 cm · adult', answer: 'keep' },
-        ],
+        seconds: 20,
         feedback:
-          "Juveniles are next year's catch, and grazers keep the algae from smothering recovering coral — the parrotfish is the lawnmower of the reef. Size limits aren't paperwork — they're the reef paying interest.",
+          "Bleached coral that's still alive can recover if the water stays clean. Coral stressed by mud and pollution dies more in a heat wave and recovers slower (UNEP).",
       },
     },
     {
-      id: 'mooring',
-      label: 'Mooring line',
-      icon: 'anchor',
-      x: 86,
-      y: 46,
+      id: 'drain',
+      label: 'Storm drain',
+      icon: 'drain',
+      x: 63,
+      y: 64,
+      box: { x: 59.8, y: 59, w: 7, h: 12 },
+      labelBelow: true,
       kind: 'choice',
-      prompt: "Ben's cousin anchors wherever the fish are. Ben uses the mooring buoy. Who's right?",
+      prompt: 'When the village floods, this drain carries the street into the bay. What should it do instead?',
       config: {
         options: [
-          {
-            id: 'cousin',
-            label: 'Cousin — anchors are fine, coral is rock',
-            feedback:
-              "Coral is alive, and slow. A dropped anchor and dragged chain can crush coral that took decades to grow. Mooring buoys exist so boats never have to touch the reef — Guam's marine preserves rely on them.",
-          },
-          {
-            id: 'ben',
-            correct: true,
-            label: 'Ben — one anchor drop can crush decades of coral; use moorings or sand patches',
-            points: { veg: 4 },
-            feedback:
-              "A dropped anchor and dragged chain can crush coral that took decades to grow. Mooring buoys exist so boats never have to touch the reef — Guam's marine preserves rely on them.",
-          },
+          { id: 'basin', correct: true, label: 'Run it through a planted basin first', points: { veg: 10 }, feedback: DRAIN_FEEDBACK },
+          { id: 'pipe', ok: true, label: 'Pipe it further out to sea', points: {}, feedback: DRAIN_FEEDBACK },
+          { id: 'block', label: 'Block it', points: { people: -5 }, feedback: `The street floods. ${DRAIN_FEEDBACK}` },
         ],
       },
+    },
+    {
+      id: 'road',
+      label: 'The road cut',
+      icon: 'tractor',
+      x: 45,
+      y: 35,
+      box: { x: 27.8, y: 17, w: 34.7, h: 28 },
+      kind: 'roadplan',
+      prompt: 'The road is going in either way. Help Tom and the contractor decide how.',
+      // The drain choice changes how much street runoff reaches the reef.
+      configFor: (done) => ({ extras: { drain: done.drain?.state || null } }),
     },
   ],
 
   overlays(done) {
     return (
       <>
-        {done.outlet && <Trace from={[24, 6]} to={[18, 46]} tone="ghost" />}
-        {done.reef && <Trace from={[20, 50]} to={[80, 80]} tone="soil" />}
-        {done.reef && (
-          <Mark x={50} y={58} icon="stream" tone="soil">
-            Runoff reaches the reef
+        {done.coral && (
+          <Mark x={62} y={92} icon="coral" tone={done.coral.state.counted === done.coral.state.healthy ? 'veg' : 'warning'}>
+            Healthy coral counted: {done.coral.state.counted} of {done.coral.state.healthy}
           </Mark>
         )}
-        {done.bucket && (
-          <Mark x={50} y={92} icon="fish" tone="veg">
-            {done.bucket.state.released} released to the live reef
+        {done.drain && (
+          <Mark x={40} y={64} icon="drain" tone={{ basin: 'veg', pipe: 'plain', block: 'danger' }[done.drain.state]}>
+            {{ basin: 'Green basin before the beach', pipe: 'Piped further out to sea', block: 'Drain blocked — the street floods' }[done.drain.state]}
           </Mark>
         )}
-        {done.mooring?.state === 'ben' && (
-          <Mark x={72} y={56} icon="anchor" tone="veg">
-            Mooring buoy · reef untouched
-          </Mark>
-        )}
-        {done.mooring?.state === 'cousin' && (
-          <Mark x={72} y={66} icon="anchor" tone="danger">
-            Anchor scar
+        {done.road && (
+          <Mark x={2} y={6} icon="tractor" tone={done.road.state.finalReef >= 0.5 ? 'veg' : 'danger'}>
+            Road plan kept
           </Mark>
         )}
       </>
     );
   },
 
-  outcome: (points) => ((points.veg || 0) >= 9 ? 'good' : 'bad'),
+  outcome: (points, done) => ((finalReef(done) ?? 0) >= 0.5 ? 'good' : 'bad'),
   consequence: {
     good: {
-      headline: 'The grey patch is taking color again.',
-      swap: { reefGrey: 'reef-recovering' },
-      marks: [
-        { x: 74, y: 70, icon: 'coral', tone: 'veg', text: 'New color flecks' },
-        { x: 56, y: 62, icon: 'fish', tone: 'veg', text: 'Fish shadows return' },
-        { x: 40, y: 22, icon: 'bucket', tone: 'veg', text: 'Cooler respectably full' },
-      ],
+      headline: 'The rainy season hits: clear water after the storm.',
+      swap: {},
+      marks: [{ x: 70, y: 76, icon: 'coral', tone: 'veg', text: 'Clear water over the point' }],
     },
     bad: {
-      headline: 'The grey keeps spreading.',
-      swap: { reefLive: 'reef-grey' },
+      headline: 'The rainy season hits: a brown bay.',
+      swap: {},
       marks: [
-        { x: 50, y: 70, icon: 'coral', tone: 'danger', text: 'Grey spreading' },
-        { x: 40, y: 22, icon: 'bucket', tone: 'danger', text: 'Bucket near-empty' },
-        { x: 70, y: 38, icon: 'boat', tone: 'danger', text: 'For sale' },
+        { x: 70, y: 76, icon: 'coral', tone: 'danger', text: 'A brown bay' },
+        { x: 70, y: 48, icon: 'home', tone: 'danger', text: 'The dive shop has closed' },
       ],
     },
   },
 
+  ruleCard: {
+    title: 'The rule',
+    intro: 'Illustrative, not a forecast.',
+    lines: [
+      'Mud reaching the reef each storm = bare ground on the hill × slope × storm strength − what barriers catch. A raw cut on a steep slope is the worst case; a cut with silt fences and a settling pond catches most of it; a cut replanted as it goes stops being bare (NRCS, erosion from bare sloped land; US EPA names construction sediment a primary reef stressor).',
+      "Reef health next year = this year's health + recovery if the water stays clear − mud − heat stress. Recovery only happens when mud is low; a heat wave on a muddy reef kills what a heat wave on a clear reef would only bleach (UNEP, 2017 brief on wastewater and reefs).",
+      'Fish, divers and wave protection follow reef health. More than 80 per cent of ocean pollution starts on land (UNEP).',
+    ],
+    coefficients: [
+      ['Storm strength: normal / big storm (year 4)', `${COEF.storm} / ${COEF.bigStorm}`, 'illustrative'],
+      ['Share of mud silt fences catch', COEF.fences, 'direction: NRCS'],
+      ['Share of the rest a settling pond catches', COEF.pond, 'direction: NRCS'],
+      ['Year-1 mud with a wet-season pause', `×${COEF.pause}`, 'illustrative'],
+      ['Street runoff through a planted basin', `×${COEF.basin}`, 'direction: UNEP'],
+      ['Reef lost per unit of mud', COEF.mudHarm, 'direction: US EPA'],
+      ['Reef regained in a clear-water year', COEF.recovery, 'direction: UNEP'],
+      ['Heat wave on muddy / clear water', `−${COEF.heatKill} / −${COEF.heatBleach}`, 'direction: UNEP'],
+    ],
+    sources: [{ label: 'US EPA — Threats to Coral Reefs', href: 'https://www.epa.gov/coral-reefs/threats-coral-reefs' }],
+  },
+
   card: {
-    title: { good: 'You traced the reef back to the land', bad: 'The grey kept spreading' },
-    fact: "Heatwaves bleach coral everywhere — but a reef smothered in sediment and fed extra nutrients can't recover between them. NOAA lists land-based pollution among the top local threats to coral, and on Guam the soil that leaves farms and burned hills ends up on the reef. UOG Sea Grant plants trees along rivers like the Ugum to hold it in place.",
-    source: 'NOAA Coral Reef Conservation Program · UOG Sea Grant watershed plantings',
-    actionLabel: 'Join a reef-flat cleanup or watershed planting day',
+    title: { good: 'The road went in and the reef came back', bad: 'The road went in and the bay went brown' },
+    fact: 'More than 80 per cent of ocean pollution starts on land (UNEP). A raw cut on a steep slope is the worst case; a cut with silt fences and a settling pond catches most of it; a cut replanted as it goes stops being bare. Coral stressed by mud and pollution dies more in a heat wave and recovers slower (UNEP).',
+    source: 'UNEP · USDA NRCS · US EPA, Threats to Coral Reefs',
+    actionLabel: 'Learn what reaches the reef — and help keep it on the land',
     actions: [
+      { label: 'US EPA — Threats to Coral Reefs', href: 'https://www.epa.gov/coral-reefs/threats-coral-reefs' },
       { label: 'UOG Sea Grant — watershed plantings', href: 'https://seagrant.uog.edu/' },
       { label: 'NOAA Coral Reef Conservation Program', href: 'https://coralreef.noaa.gov/' },
     ],

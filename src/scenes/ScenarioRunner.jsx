@@ -12,13 +12,14 @@ import ChoiceCard from '../primitives/ChoiceCard.jsx';
 import PumpDial from '../primitives/PumpDial.jsx';
 import ForecastStrip from '../primitives/ForecastStrip.jsx';
 import TimedGrab from '../primitives/TimedGrab.jsx';
-import DragSort from '../primitives/DragSort.jsx';
 import ComposeStatement from '../primitives/ComposeStatement.jsx';
 import TillerPlan from '../primitives/TillerPlan.jsx';
 import FertilizerPlan from '../primitives/FertilizerPlan.jsx';
 import RiskMap from '../scenarios/typhoon/RiskMap.jsx';
 import RepairFund from '../scenarios/typhoon/RepairFund.jsx';
 import MeetingVote from '../scenarios/typhoon/MeetingVote.jsx';
+import CoralCount from '../scenarios/reef/CoralCount.jsx';
+import RoadPlan from '../scenarios/reef/RoadPlan.jsx';
 import KnowledgeCard from './KnowledgeCard.jsx';
 
 const PRIMITIVES = {
@@ -26,13 +27,14 @@ const PRIMITIVES = {
   pump: PumpDial,
   forecast: ForecastStrip,
   grab: TimedGrab,
-  sort: DragSort,
   compose: ComposeStatement,
   till: TillerPlan,
   fertilizer: FertilizerPlan,
   riskmap: RiskMap,
   fund: RepairFund,
   meeting: MeetingVote,
+  coralcount: CoralCount,
+  roadplan: RoadPlan,
 };
 
 const VERDICT = { correct: 'Good call', ok: 'Partly there', wrong: 'Not quite' };
@@ -54,39 +56,6 @@ function DialogueBox({ persona, text, cta, onNext }) {
       </div>
       <PixelButton onClick={onNext}>{cta}</PixelButton>
     </div>
-  );
-}
-
-function OneSystemFrame({ onClose }) {
-  const nodes = [
-    { icon: 'grass', title: 'The Field', sub: 'Scenario 1' },
-    { icon: 'mountain', title: 'The Ridge', sub: 'Scenario 2' },
-    { icon: 'stream', title: 'The Stream', sub: 'Every hard rain' },
-    { icon: 'coral', title: 'The Reef', sub: 'You are here' },
-  ];
-  return (
-    <Dialog labelledBy="frame-title" className="frame">
-      <p className="label frame__eyebrow">The island is one system</p>
-      <h2 id="frame-title" className="frame__title">
-        Same soil. One trip.
-      </h2>
-      <ol className="frame__chain">
-        {nodes.map((n) => (
-          <li key={n.title} className="frame__node">
-            <span className="frame__icon">
-              <Icon name={n.icon} size={34} />
-            </span>
-            <span className="frame__name">{n.title}</span>
-            <span className="frame__sub">{n.sub}</span>
-          </li>
-        ))}
-      </ol>
-      <p className="frame__body">
-        The field that gets plowed bare, the hills that burn, the stream that floods brown, the reef that goes grey — it
-        is the same soil, finishing its trip. Hold it up there and you save the coral down here.
-      </p>
-      <PixelButton onClick={onClose}>Continue</PixelButton>
-    </Dialog>
   );
 }
 
@@ -141,7 +110,6 @@ export default function ScenarioRunner({ scenario: sc, content }) {
   const persona = { ...sc.persona, color: content.persona.tint };
   const [openId, setOpenId] = useState(null);
   const [result, setResult] = useState(null);
-  const [frame, setFrame] = useState(null);
   const [ruleOpen, setRuleOpen] = useState(false);
   const [finaleSeen, setFinaleSeen] = useState(false);
   const [recent, setRecent] = useState(null);
@@ -158,7 +126,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
   const totals = useMemo(() => sumPoints(Object.values(done).map((d) => d.points)), [done]);
   const allDone = sc.hotspots.every((h) => done[h.id]);
   const open = sc.hotspots.find((h) => h.id === openId);
-  const outcome = sc.outcome(totals);
+  const outcome = sc.outcome(totals, done);
   const showOutcome = run.phase === 'consequence' || run.phase === 'card';
   const Primitive = open && PRIMITIVES[open.kind];
 
@@ -177,7 +145,6 @@ export default function ScenarioRunner({ scenario: sc, content }) {
   const closeHotspot = () => {
     if (result) {
       setRecent({ points: result.points, key: Date.now() });
-      if (open.afterFrame) setFrame(open.afterFrame);
     }
     setOpenId(null);
     setResult(null);
@@ -264,7 +231,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
           </section>
 
           {run.phase === 'consequence' && (
-            <DialogueBox persona={persona} text={sc.closing} cta="Open knowledge card" onNext={() => setPhase('card')} />
+            <DialogueBox persona={persona} text={typeof sc.closing === 'string' ? sc.closing : sc.closing[outcome]} cta="Open knowledge card" onNext={() => setPhase('card')} />
           )}
         </div>
 
@@ -368,12 +335,10 @@ export default function ScenarioRunner({ scenario: sc, content }) {
               <PixelButton onClick={closeHotspot}>Continue</PixelButton>
             </div>
           ) : (
-            <Primitive config={open.config} onComplete={finishHotspot} />
+            <Primitive config={open.configFor ? open.configFor(done) : open.config} onComplete={finishHotspot} />
           )}
         </Dialog>
       )}
-
-      {frame === 'oneSystem' && <OneSystemFrame onClose={() => setFrame(null)} />}
 
       {ruleOpen && sc.ruleCard && <RuleCard rule={sc.ruleCard} onClose={() => setRuleOpen(false)} />}
 
