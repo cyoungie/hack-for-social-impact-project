@@ -31,7 +31,7 @@ export const ROUTES = [
   {
     id: 'straight',
     label: 'Straight up the steep face',
-    note: 'shortest, cheapest, most bare steep ground',
+    note: 'Shortest and cheapest, but the most bare, steep ground.',
     bare: 1.0,
     slope: 1.0,
     cost: 0,
@@ -42,7 +42,7 @@ export const ROUTES = [
   {
     id: 'switch',
     label: 'Switchbacks across the slope',
-    note: 'longer, moderate slope',
+    note: 'Longer, at a moderate grade.',
     bare: 0.8,
     slope: 0.55,
     cost: 8,
@@ -53,7 +53,7 @@ export const ROUTES = [
   {
     id: 'ridge',
     label: 'Around the ridge through the forest',
-    note: 'longest, flattest, clears forest',
+    note: 'Longest and flattest, but clears forest.',
     bare: 1.3,
     slope: 0.3,
     cost: 14,
@@ -63,17 +63,12 @@ export const ROUTES = [
   },
 ];
 
+// Each control adds cost or time, which the foreman points out.
 export const CONTROLS = [
-  { id: 'fences', label: 'Silt fences', leaf: '+ catches mud at the cut', people: '0', coin: '−' },
-  { id: 'pond', label: 'Settling pond below the cut', leaf: '+ settles out what gets past', people: '0', coin: '−' },
-  {
-    id: 'pause',
-    label: 'No earthwork in the two wettest months',
-    leaf: '+ no bare earthwork in the heaviest rain',
-    people: "− six weeks' pay lost",
-    coin: "−, six weeks' pay lost",
-  },
-  { id: 'replant', label: 'Replant as you go', leaf: '+ the cut stops being bare', people: '0', coin: '−' },
+  { id: 'fences', label: 'Silt fences', foreman: 'That’s more material and a day to set up each section.' },
+  { id: 'pond', label: 'A settling pond below the cut', foreman: 'We’d have to dig the pond before we cut. That’s on the bill.' },
+  { id: 'pause', label: 'No earthwork during the two wettest months', foreman: 'My crew loses about six weeks of work.' },
+  { id: 'replant', label: 'Replant cut slopes as each section is finished', foreman: 'Planting every finished section adds cost.' },
 ];
 
 const REPLANT_BARE = { 1: 0.6, 2: 0.3, 3: 0.1, 4: 0.1, 5: 0.1 };
@@ -93,8 +88,9 @@ export function reefWord(r) {
   return 'dead at the point';
 }
 
-// plan: { route, controls: Set }, extras: { drain: 'basin'|'pipe'|'block'|null }
-export function runReef(plan, extras = {}) {
+// plan: { route, controls: Set }
+// start: { reef — set by the coral count and farm_runoff; riverMud — lower when bank_planted }
+export function runReef(plan, start = {}) {
   const route = ROUTES.find((r) => r.id === plan.route);
   const c = plan.controls;
   let catchShare = 0;
@@ -102,14 +98,15 @@ export function runReef(plan, extras = {}) {
   if (c.has('pond')) catchShare += (1 - catchShare) * COEF.pond;
 
   const frames = [];
-  let reef = START_REEF;
+  let reef = start.reef ?? START_REEF;
+  const startReef = reef;
   let heatKilled = false;
   for (const t of YEARS) {
     const strength = t === STORM_YEAR ? COEF.bigStorm : COEF.storm;
     const bare = route.bare * (c.has('replant') ? REPLANT_BARE[t] : 1);
     let mud = bare * route.slope * strength * (1 - catchShare);
     if (c.has('pause') && t === 1) mud *= COEF.pause;
-    if (extras.drain === 'basin') mud *= COEF.basin;
+    mud *= start.riverMud ?? 1;
 
     const heat = t === HEAT_YEAR;
     const clear = mud < COEF.clearWater;
@@ -142,7 +139,7 @@ export function runReef(plan, extras = {}) {
     // No recovery in the heat-wave year itself.
     reef = clamp(reef + (clear && !heat ? COEF.recovery : 0) - COEF.mudHarm * mud - heatLoss, 0.05, 1);
   }
-  return { frames, summary: summarize(frames, route, c, heatKilled), finalReef: reef };
+  return { frames, summary: summarize(frames, route, c, heatKilled, startReef), finalReef: reef };
 }
 
 function yearLine({ t, mud, reef, heat, clear, route, c }) {
@@ -158,28 +155,27 @@ function yearLine({ t, mud, reef, heat, clear, route, c }) {
   return `Rainy season. ${clear ? 'Clear water — the reef recovers.' : 'Mud keeps the reef from recovering.'} ${mudPart} Reef: ${reefWord(reef)}.`;
 }
 
-// The year-5 line, assembled from the frames.
-function summarize(frames, route, c, heatKilled) {
+// The year-5 line, assembled from the frames (wording from the master script's samples).
+function summarize(frames, route, c, heatKilled, startReef) {
   const parts = [];
   const paid = ['fences', 'pond', 'replant'].some((id) => c.has(id));
-  if (c.has('pause')) parts.push('Six weeks without pay for the crew, a road three months late.');
-  else if (route.id === 'ridge') parts.push('Flattest route, least mud per metre, but 300 m of forest cleared and the longest road.');
-  else if (route.id === 'straight' && !paid) parts.push('Cheapest road, done on time.');
+  if (c.has('pause')) parts.push('Six weeks without work for the crew and a road three months late.');
+  else if (route.id === 'ridge') parts.push('Least mud per metre, but 300 m of forest cleared and the longest drive.');
+  else if (route.id === 'straight' && !paid) parts.push('Cheapest road, finished on time.');
   else parts.push('The road cost more and finished the same season.');
 
-  const storms = frames.filter((f) => f.mud >= 0.5).length;
-  if (storms >= 4) parts.push('The bay was brown every storm.');
-  else if (frames.every((f) => f.mud < 0.3)) parts.push('Mud fell by most of the way.');
-
-  if (c.has('replant')) parts.push('The cut was green before the first big storm.');
-  if (heatKilled) parts.push('The year-2 heat wave killed the stressed coral at the point.');
-  else {
-    const back = frames.find((f) => f.year >= 3 && f.reef >= START_REEF);
-    parts.push(`The coral survived the heat wave bleached${back ? `, and recovered by year ${back.year}` : ''}.`);
-  }
   const end = frames[4].reef;
-  if (end > START_REEF) parts.push('The reef at the point is healthier in year 5 than at the start.');
-  if (end < 0.15) parts.push('By year 5 the dive shop is closed and Tom fishes further out.');
-  if (route.id === 'ridge') parts.push('The ridge sends more water down now.');
+  if (heatKilled) {
+    const brownEvery = frames.every((f) => f.mud >= 0.5);
+    parts.push(brownEvery ? 'The bay went brown every storm, and the year-2 heat wave killed most of the stressed coral at the point.' : 'The year-2 heat wave killed most of the stressed coral at the point.');
+  } else if (c.has('replant')) {
+    parts.push(`The cut was green before the first big storm${end > startReef ? ', and the reef at the point is healthier in year 5 than at the start' : ''}.`);
+  } else if (route.id === 'ridge') {
+    parts.push('The reef did better than the steep route and worse than switchbacks with controls, and more water now runs off the ridge.');
+  } else {
+    const back = frames.find((f) => f.year >= 3 && f.reef >= startReef);
+    parts.push(`Most of the mud stayed on the hill, the coral bleached in the heat wave but survived${back ? `, and it recovered by year ${back.year}` : ''}.`);
+  }
+  if (end < 0.1) parts.push('By year 5 the dive shop has closed and Tom fishes farther out.');
   return parts.join(' ');
 }

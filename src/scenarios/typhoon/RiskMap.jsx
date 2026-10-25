@@ -3,19 +3,10 @@ import { PixelButton } from '../../components/ui.jsx';
 import { usePick } from '../../components/usePick.js';
 import VillageMap, { HOUSES, atRisk } from './VillageMap.jsx';
 
+// 2.1 shows two toggles; land cover and slope are on the baseline map.
 const LAYERS = [
-  {
-    id: 'landcover',
-    label: 'Land cover',
-    note: 'Ridge forest and savanna above the village, a strip of riverbank trees, built ground along the road, the reef flat in the bay. (From ESA WorldCover 2021, collapsed to five classes; a starting condition, not a prediction.)',
-  },
-  {
-    id: 'flood',
-    label: 'Flood',
-    note: "Last storm's water line: the band the water reached two nights ago. (A historical pattern: where it went, not where it will go.)",
-  },
-  { id: 'bigger', label: 'Bigger storm', note: 'A wider band: where a bigger storm would reach.' },
-  { id: 'slope', label: 'Slope', note: 'Flat by the river, moderate on the road, steep on the ridge.' },
+  { id: 'flood', label: 'Flood', note: 'The ground the water reached on Tuesday.' },
+  { id: 'bigger', label: 'Bigger storm', note: "A wider band, from the island's hazard map." },
 ];
 
 // Understand the risk: toggle layers, tag each house At risk or Safe.
@@ -33,7 +24,7 @@ export default function RiskMap({ config, onComplete }) {
       feedback: tier.feedback,
       verdict: right === HOUSES.length ? 'correct' : right >= 5 ? 'ok' : 'wrong',
       state: { right, tags },
-      links: config.links,
+      source: config.source,
     });
   };
 
@@ -57,7 +48,7 @@ export default function RiskMap({ config, onComplete }) {
         </div>
 
         <div className="riskmap__side">
-          <p className="label">Layers · Observed</p>
+          <p className="label">Map layers</p>
           <div className="riskmap__toggles">
             {LAYERS.map((l) => (
               <button

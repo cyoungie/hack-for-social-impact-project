@@ -19,6 +19,9 @@ const INITIAL = {
   results: {},
   // Local dates the player did something (for the day streak), newest last.
   playDays: [],
+  // Carry-over flags (farm_runoff, ridge_strip, bank_planted, water_kit, sewer_connected).
+  // A scenario reads the flags as they stood when it started, so only earlier scenarios affect it.
+  flags: {},
   // Intro being shown (never saved — a refresh during an intro lands back on the map).
   introId: null,
   // Map slot whose GameScene is open.
@@ -97,7 +100,7 @@ export function GameStateProvider({ children }) {
         scene: 'game',
         introId: null,
         gameId: id,
-        run: s.run?.id === id ? s.run : { id, phase: 'explore', done: {} },
+        run: s.run?.id === id ? s.run : { id, phase: 'baseline', done: {}, flags: { ...s.flags } },
       })),
     [],
   );
@@ -109,6 +112,7 @@ export function GameStateProvider({ children }) {
       setState((s) => ({
         ...s,
         playDays: withToday(s.playDays),
+        flags: result.setFlags ? { ...s.flags, ...result.setFlags } : s.flags,
         run: { ...s.run, done: { ...s.run.done, [hotspotId]: result } },
       })),
     [],

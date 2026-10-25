@@ -1,56 +1,213 @@
 import TownScene from './scenes/TownScene.jsx';
+import TownMap from './town/TownMap.jsx';
+import { LayerMap, COVER, COVER_NOTE } from '../components/LayerMap.jsx';
 
-// Scenario #5: Military & Industrial Land Development (rough draft from the team, built with pre-written replies).
-// Score types fold in: social -> PEOPLE, environmental -> WATER.
+// The town, the plant and the base are fictional ("the plant", "the base"). Real reference points
+// (PFOS in Guam wells, the 2021 Red Hill fuel leak in Hawai'i) appear only on source and knowledge cards.
+const WHO = 'https://www.who.int/publications/i/item/9789240045064';
+
+// The utility's well-test record and the clinic's case counts for this fictional town.
+const TESTS = [
+  { label: '2024 · Q1', over: false },
+  { label: '2024 · Q3', over: false },
+  { label: '2025 · Q1', over: false },
+  { label: '2025 · Q3', over: true },
+  { label: '2026 · Q1', over: false },
+  { label: '2026 · Q3', over: true },
+];
+const CASES = [2, 3, 2, 4, 6, 9];
+
+function Baseline({ flags }) {
+  return (
+    <div className="prim">
+      <LayerMap
+        layers={[{ id: 'landcover', label: 'Land cover', note: `Forest on the hill, the plant and the base, the six streets, the harbor. ${COVER_NOTE}` }]}
+        legend={[
+          { color: COVER.trees, label: 'Forest on the hill' },
+          { color: COVER.built, label: 'The plant, the base, houses' },
+          { color: COVER.grass, label: 'Yards and lots' },
+          { color: COVER.water, label: 'Aquifer and harbor' },
+        ]}
+        render={(on) => <TownMap on={on} label="Baseline map of the six streets and the hill" />}
+      />
+      <div className="divelog">
+        <p className="label">The utility’s well tests, last three years</p>
+        <ul className="tests">
+          {TESTS.map((t) => (
+            <li key={t.label} className={t.over ? 'is-over' : ''}>
+              {t.label} · {t.over ? 'over the limit' : 'within the limit'}
+            </li>
+          ))}
+        </ul>
+        <p className="label">Clinic · stomach-ache cases from the six streets, last six months</p>
+        <p>{CASES.join(' · ')}</p>
+        {flags.sewer_connected && <p className="caption">The sewer now reaches more homes, so fewer septic tanks sit near the well: the hill is the most likely source.</p>}
+      </div>
+    </div>
+  );
+}
+
+// Scenario 5 (Help a Shop Owner): Military and Industrial Land Development
 export default {
   id: 'industry',
-  plate: 'LAND DEVELOPMENT · 5 OF 5',
-  persona: { name: 'Marcus', role: 'Neighbor, industrial side of town' },
-  closing: "Maybe moving away isn't the only answer after all.",
+  plate: 'INDUSTRY & MILITARY · LAND DEVELOPMENT',
+  persona: { name: 'Marco', role: 'Runs the corner shop' },
+  closing:
+    'The water’s being tested, my kids are drinking from the clinic’s station, and for the first time the whole town was in the same room as the people on the hill. Maybe we don’t have to move after all.',
+
+  Baseline,
+  baselineTitle: 'The six streets and the hill above them',
 
   Scene: TownScene,
   sceneState(done, outcome) {
-    return { path: done.act?.state.path || null, outcome };
+    return {
+      station: done.tap?.state === 'station',
+      cluster: Boolean(done.clinic?.state.cluster),
+      plan: done.effort?.state.plan || [],
+      townhall: Boolean(done.townhall),
+      posted: done.update?.state === 'ask',
+      outcome,
+    };
   },
 
   hotspots: [
     {
-      id: 'act',
-      label: 'Factories + base',
-      icon: 'fence',
-      x: 50,
-      y: 30,
-      box: { x: 0, y: 8, w: 92, h: 36 },
-      zoom: true,
-      kind: 'town',
-      prompt: 'Which of the following are ways in which the community could intervene here?',
+      id: 'tap',
+      label: '5.1 · The tap',
+      icon: 'faucet',
+      x: 12,
+      y: 56,
+      box: { x: 4, y: 47, w: 16.4, h: 19 },
+      labelBelow: true,
+      kind: 'choice',
+      prompt: 'Marco’s family lives on one of the six streets. What do you tell them to do with the tap water today?',
+      say: { correct: 'Two jugs on the way home. Fine.', wrong: 'So we’ve been doing it wrong.' },
+      source: {
+        source: 'WHO Guidelines for Drinking-water Quality · CDC',
+        text: 'When water may be contaminated, find out what is in it, tell people clearly and quickly, and provide safe water — such as bottled or trucked water — until it is fixed. Boiling does not make water containing fuel or other chemicals safe.',
+        links: [
+          { label: 'WHO drinking-water guidelines', href: WHO },
+          { label: 'CDC — water emergencies', href: 'https://www.cdc.gov/water-emergency/about/index.html' },
+        ],
+      },
       config: {
-        decisionMakerBonus: { people: 5 },
+        options: [
+          {
+            id: 'station',
+            correct: true,
+            label: 'Don’t drink it; use the clinic’s water station until the test results are posted',
+            points: { people: 5 },
+            feedback: 'Marco fills two jugs at the clinic on his way home. It’s a hassle, but nobody in the house is drinking from the tap until there’s a result.',
+          },
+          {
+            id: 'boil',
+            label: 'Boil it first',
+            points: { people: -3 },
+            // Script: "It can actually concentrate them" — checked sources confirm this for PFAS, not fuel.
+            feedback: 'Boiling kills germs, but it doesn’t remove fuel or PFAS. It can actually concentrate PFAS as the water evaporates.',
+          },
+          {
+            id: 'fine',
+            label: 'The smell’s faded, it’s probably fine',
+            points: { people: -5 },
+            feedback: 'A fading smell doesn’t mean the water is clean. Many contaminants have no smell or taste at all.',
+          },
+        ],
+      },
+    },
+    {
+      id: 'clinic',
+      label: '5.2 · The clinic',
+      icon: 'flask',
+      x: 41,
+      y: 56,
+      box: { x: 34, y: 49, w: 15, h: 17 },
+      labelBelow: true,
+      kind: 'cases',
+      prompt: 'Map the Cases: drag each patient card to their street on the town map, in 30 seconds.',
+      say: { correct: 'That’s the six streets. Right under the hill.', wrong: 'Hard to see a pattern like that.' },
+      config: {
+        seconds: 30,
+        points: { people: 5 },
+        feedback: 'Mapping cases by where and when they happen is how a water problem gets proven, and how families get taken seriously.',
+      },
+    },
+    {
+      id: 'effort',
+      label: '5.3 · Where to put the effort',
+      icon: 'people',
+      x: 40,
+      y: 76,
+      box: { x: 4, y: 68, w: 66, h: 13 },
+      labelBelow: true,
+      kind: 'effort',
+      prompt: 'Marco wants to know what the neighbourhood can actually do. Help him decide where to put their time and money this month.',
+      say: { correct: 'Okay. That I can take to the neighbours.', ok: 'Okay. That I can take to the neighbours.', wrong: 'Okay. That I can take to the neighbours.' },
+      source: {
+        source: 'US EPA',
+        text: 'Certified activated carbon, ion-exchange and reverse-osmosis filters can greatly reduce PFAS — look for NSF/ANSI 53 or 58 — but only if they are maintained.',
+        href: 'https://www.epa.gov/water-research/identifying-drinking-water-filters-certified-reduce-pfas',
+      },
+      configFor: (done, flags) => ({ start: { hillSource: Boolean(flags.sewer_connected) } }),
+    },
+    {
+      id: 'townhall',
+      label: '5.4 · The town hall',
+      icon: 'board',
+      x: 70,
+      y: 56,
+      box: { x: 62, y: 47, w: 16.4, h: 19 },
+      kind: 'townhall',
+      // Only if the town hall was chosen in 5.3.
+      when: (done) => Boolean(done.effort?.state.plan.includes('townhall')),
+      prompt: 'Who do you want in the room?',
+      say: { correct: 'Monthly results. In writing.', wrong: 'Well, at least people showed up.' },
+      config: {
         results: {
-          townhall: {
-            points: { people: 10, water: 5 },
-            feedback: 'A town hall puts the people who can act in the same room as the people living with the water — and on the record.',
+          room: {
+            points: { people: 15, water: 5 },
+            feedback: 'The data was on the table and the people who could act on it were in the room. The meeting ends with a written agreement to post test results monthly.',
           },
-          discuss: {
-            points: { people: 10 },
-            feedback: 'Asking directly, and writing down the answers, gives the town something to hold people to at the next meeting.',
-          },
-          filter: {
-            points: { water: 10, people: 5 },
-            feedback:
-              'US EPA says certified activated carbon, ion-exchange and reverse-osmosis filters can greatly reduce PFAS — look for NSF/ANSI 53 or 58 certification — but only if they are maintained. Activated carbon, often with aeration, can remove fuel chemicals like benzene, but some fuel chemicals are harder to remove: the real fix is keeping fuel out of the ground.',
-          },
+          friends: { points: { people: 3 }, feedback: 'A full room, but nobody there could answer the questions. Next time, invite the people who hold the data.' },
+          again: { points: { people: 3 }, feedback: 'The meeting ended with a plan to meet again.' },
         },
+      },
+    },
+    {
+      id: 'update',
+      label: '5.5 · Community update',
+      icon: 'board',
+      x: 84,
+      y: 58,
+      box: { x: 79.5, y: 52, w: 8, h: 14 },
+      labelBelow: true,
+      kind: 'choice',
+      prompt: 'The base has posted a ‘community update’ for next Thursday. Marco’s neighbours say nothing ever changes at these. Should he go?',
+      say: { correct: 'I’ll pin it up myself.', ok: 'I heard it. I just don’t have it.', wrong: 'Maybe next time.' },
+      source: {
+        source: 'Hawaiʻi Department of Health · US EPA · UN SDG 6',
+        text: 'After the 2021 Red Hill fuel leak in Hawaiʻi, the state health department required an independent assessment of the fuel facility and rejected one the Navy picked as not independent enough; US EPA now runs its own water sampling and posts results publicly. UN Goal 6 includes protecting aquifers and giving local communities a say in managing their water.',
+        links: [
+          { label: 'US EPA — Red Hill', href: 'https://www.epa.gov/red-hill' },
+          { label: 'UN Sustainable Development Goal 6', href: 'https://sdgs.un.org/goals/goal6' },
+        ],
+      },
+      config: {
+        options: [
+          { id: 'ask', correct: true, label: 'Go, and ask for the monitoring results in writing', points: { people: 10 }, feedback: 'He gets a copy, and by Monday it’s pinned to the notice board for the whole street to read.' },
+          { id: 'listen', ok: true, label: 'Go and listen', points: { people: 3 }, feedback: 'He hears the presentation, but leaves without anything in writing.' },
+          { id: 'skip', label: 'Skip it', points: { people: -5 }, feedback: 'The update goes ahead with a handful of people, and nobody from the six streets is there.' },
+        ],
       },
     },
   ],
 
   overlays: () => null,
 
-  outcome: () => 'good',
+  outcome: (points) => ((points.people || 0) >= 15 ? 'good' : 'bad'),
   consequence: {
-    good: { headline: 'The town is working on it — together.', swap: {}, marks: [] },
-    bad: { headline: 'The town is working on it — together.', swap: {}, marks: [] },
+    good: { headline: 'The water’s being tested, and the town is in the room.', swap: {}, marks: [] },
+    bad: { headline: 'The tap is still a question mark.', swap: {}, marks: [] },
   },
 
   card: {

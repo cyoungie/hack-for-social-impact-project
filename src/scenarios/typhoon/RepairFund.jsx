@@ -6,12 +6,11 @@ import { compareWith } from '../../data/scoring.js';
 import { APPROACHES, COINS, runRule } from './rule.js';
 import YearStrip from './YearStrip.jsx';
 
-const BASELINE = runRule(new Set());
 
 // Points for the plan you keep: how its year-5 bars compare to doing nothing.
-function planPoints(result) {
+function planPoints(result, flags) {
   const y5 = result.frames[4];
-  const b5 = BASELINE.frames[4];
+  const b5 = runRule(new Set(), { flags }).frames[4];
   return { veg: Math.round((y5.leaf - b5.leaf) / 4), people: Math.round((y5.people - b5.people) / 4) };
 }
 
@@ -27,7 +26,7 @@ function Allocator({ onRun }) {
   const fund = (a) => () => {
     if (funded.includes(a.id)) return;
     if (a.cost > left) {
-      setMsg(`${a.label} costs ${a.cost} coins — you have ${left} left.`);
+      setMsg(`${a.label} costs ${a.cost} ${a.cost === 1 ? 'share' : 'shares'} — you have ${left} left.`);
       return;
     }
     setMsg('');
@@ -37,22 +36,22 @@ function Allocator({ onRun }) {
   return (
     <>
       <div className="fund__tray">
-        <span className="label">Repair fund</span>
+        <span className="label">Recovery budget</span>
         <span className="fund__coins">
           {Array.from({ length: left }, (_, i) => (
             <button
               key={i}
               type="button"
               className={`coin ${picked ? 'is-picked' : ''}`}
-              aria-label={`Coin ${i + 1} of ${left} left`}
+              aria-label={`Budget share ${i + 1} of ${left} left`}
               {...itemProps('coin')}
             >
               <Icon name="coin" size={18} />
             </button>
           ))}
-          {left === 0 && <span className="caption">All four coins spent.</span>}
+          {left === 0 && <span className="caption">All four shares spent.</span>}
         </span>
-        <span className="caption">Drag a coin onto an approach — or click a coin, then an approach.</span>
+        <span className="caption">Drag a share onto a project — or click a share, then a project. Hover a project for its tradeoff.</span>
       </div>
       {msg && (
         <p className="fund__msg" role="status">
@@ -66,30 +65,19 @@ function Allocator({ onRun }) {
           return (
             <li key={a.id} className={`approach ${on ? 'is-on' : ''}`}>
               <button type="button" className={`approach__main ${picked && !on ? 'is-target' : ''}`} disabled={on} {...targetProps(fund(a))}>
-                <span className="approach__cost" aria-label={`Costs ${a.cost} ${a.cost === 1 ? 'coin' : 'coins'}`}>
+                <span className="approach__cost" aria-label={`Costs ${a.cost} ${a.cost === 1 ? 'share' : 'shares'}`}>
                   {Array.from({ length: a.cost }, (_, i) => (
                     <Icon key={i} name="coin" size={14} />
                   ))}
                 </span>
                 <span className="approach__label">{a.label}</span>
                 <span className="approach__term">
-                  <span className="label">In the rule</span> {a.term}
-                </span>
-                <span className="approach__icons">
-                  <span title="Leaf — soil, water, vegetation">
-                    <Icon name="grass" size={14} /> {a.leaf}
-                  </span>
-                  <span title="People — safety and wellbeing">
-                    <Icon name="people" size={14} /> {a.people}
-                  </span>
-                  <span title="Coin — jobs and money">
-                    <Icon name="coin" size={14} /> {a.coin}
-                  </span>
+                  <span className="label">Tradeoff</span> {a.tradeoff}
                 </span>
               </button>
               {on && (
                 <button type="button" className="approach__undo" onClick={() => setFunded((f) => f.filter((x) => x !== a.id))}>
-                  Take coins back
+                  Take the shares back
                 </button>
               )}
             </li>
@@ -104,22 +92,22 @@ function Allocator({ onRun }) {
   );
 }
 
-// Invest in reducing the risk: spend four coins, watch five years, optionally compare a second plan.
-export default function RepairFund({ onComplete }) {
+// The recovery budget (main decision): four shares, six projects, five years; optionally compare a second plan.
+export default function RepairFund({ config, onComplete }) {
   const [plans, setPlans] = useState([]); // up to two arrays of approach ids
   const [allocating, setAllocating] = useState(true);
   const [played, setPlayed] = useState(0);
-  const results = useMemo(() => plans.map((ids) => runRule(new Set(ids))), [plans]);
+  const results = useMemo(() => plans.map((ids) => runRule(new Set(ids), { flags: config.flags })), [plans, config.flags]);
 
   const keep = (i) => {
     const r = results[i];
     const other = results[1 - i];
     onComplete({
-      points: planPoints(r),
+      points: planPoints(r, config.flags),
       feedback: `${planName(plans[i])}. ${r.summary}`,
       verdict: 'ok',
       state: { plan: plans[i] },
-      compare: other ? compareWith(planName(plans[1 - i]), planPoints(other), other.summary) : undefined,
+      compare: other ? compareWith(planName(plans[1 - i]), planPoints(other, config.flags), other.summary) : undefined,
     });
   };
 
@@ -133,7 +121,7 @@ export default function RepairFund({ onComplete }) {
   );
 
   if (allocating && plans.length === 1) {
-    // Compare: plan A stays on the left while you spend the coins again on the right.
+    // Compare: plan A stays on the left while you spend the shares again on the right.
     return (
       <div className="prim">
         <div className="fund__strips is-compare">

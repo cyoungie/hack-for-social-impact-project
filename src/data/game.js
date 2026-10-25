@@ -21,72 +21,19 @@ export const BIOMES = [
   { id: 'urban', title: 'Urban Megacity', icon: 'city', body: 'Heat islands, sealed soil, and ten million everyday decisions.' },
 ];
 
-// Map slots in unlock order (1 -> 5). x/y are percentages of the island image box, so badges stay
-// anchored to the land. Every slot opens its intro; slots without gameplay in src/scenarios land on
-// the GameScene stub.
+// The five places on the map. x/y are percentages of the island image box, so badges stay anchored
+// to the land. Players can start anywhere. Title, place (the map icon) and resident come from
+// src/content/scenario{n}.json; `line` is the one line shown when hovering the icon.
 const SLOTS = [
-  {
-    id: 'field',
-    n: 1,
-    stat: 'Soil',
-    line: 'Help a farmer — storms are stealing the topsoil',
-    color: 'var(--soil)',
-    x: 40,
-    y: 80,
-    tag: 'SOIL',
-  },
-  {
-    id: 'ridge',
-    n: 2,
-    stat: 'People',
-    line: 'Help Nina’s village get ready before the next storm',
-    color: 'var(--people)',
-    x: 22,
-    y: 64,
-    tag: 'PEOPLE',
-  },
-  {
-    id: 'coast',
-    n: 3,
-    stat: 'Reef',
-    line: 'Help a fisherman — half his reef has gone grey',
-    color: 'var(--veg)',
-    x: 53,
-    y: 33,
-    tag: 'REEF',
-    body: 'Last year the water got too warm and the coral went white. Now every rain turns the bay brown.',
-    difficulty: 2,
-  },
-  {
-    id: 'lens',
-    n: 4,
-    stat: 'Water',
-    line: 'One aquifer under everyone — and the taps taste salty',
-    color: 'var(--water)',
-    x: 74,
-    y: 30,
-    tag: 'WATER',
-    body: "Since the last typhoon, Ana's water has come and gone. Her house sits right over the aquifer, with an old septic tank in the yard.",
-    difficulty: 2,
-  },
-  {
-    id: 'industry',
-    n: 5,
-    stat: 'All stats',
-    line: 'The water’s gone funny near the buildup — act, don’t move',
-    color: 'var(--warning)',
-    x: 63,
-    y: 18,
-    tag: 'ALL STATS',
-    body: 'The water on this side of town has turned black with soot and oil. Is moving away the only answer?',
-    difficulty: 3,
-  },
+  { id: 'field', n: 1, stat: 'Soil', tag: 'SOIL', color: 'var(--soil)', x: 40, y: 80, line: 'Storms keep washing her topsoil into the stream.' },
+  { id: 'ridge', n: 2, stat: 'People', tag: 'PEOPLE', color: 'var(--people)', x: 22, y: 64, line: 'The river came into her house, and the rebuild meeting is Saturday.' },
+  { id: 'coast', n: 3, stat: 'Reef', tag: 'REEF', color: 'var(--veg)', x: 53, y: 33, line: 'A new road up the hill turns his bay brown every time it rains.' },
+  { id: 'lens', n: 4, stat: 'Water', tag: 'WATER', color: 'var(--water)', x: 74, y: 30, line: 'Her water keeps cutting out, and an old septic tank sits over the aquifer.' },
+  { id: 'industry', n: 5, stat: 'All stats', tag: 'ALL STATS', color: 'var(--warning)', x: 63, y: 18, line: 'The tap runs grey some mornings, and nobody up the hill tells the town anything.' },
 ];
 
-// Title, location and persona come from src/content/scenario{n}.json.
 export const PROBLEMS = SLOTS.map((slot) => {
   const c = CONTENT[slot.id];
-  return { ...slot, title: `${c.title} · ${c.location}`, persona: c.persona };
+  return { ...slot, scenarioTitle: c.title, place: c.location, title: `${c.title} · ${c.location}`, resident: c.persona.name, persona: c.persona };
 });
 
-export const SAFE_YIELD = 52;

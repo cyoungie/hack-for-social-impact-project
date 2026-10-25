@@ -16,6 +16,7 @@ export const COEF = {
   dredgeOnce: 1.0, // dredged mouth: flood depth down in the first storm only
   mudToReef: 0.12, // reef health lost per unit of mud reaching the bay
   reefRecovery: 0.08, // reef health regained per calm year
+  clearRecovery: 0.15, // ...and per calm year with little mud
   slope: 1.0,
 };
 
@@ -30,60 +31,12 @@ export const DOWNSTREAM = ['h1', 'h2', 'h6'];
 export const STREET = ['h3', 'h4', 'h5', 'h7'];
 
 export const APPROACHES = [
-  {
-    id: 'concrete',
-    label: 'Concrete the riverbank',
-    cost: 2,
-    term: 'Channel hardening up; bank vegetation to zero',
-    leaf: '− (bank trees gone, water faster to the bay)',
-    people: '+ at these houses, − at the ones downstream',
-    coin: '− (upkeep every few years)',
-  },
-  {
-    id: 'dredge',
-    label: 'Dredge the river mouth, spoil onto the reef flat',
-    cost: 1,
-    term: 'Flood depth down this year; reef buffer down from next year',
-    leaf: '−− (reef smothered)',
-    people: '+ now, − by year 3',
-    coin: '+ (quick work for the crew)',
-  },
-  {
-    id: 'bridge',
-    label: 'Raise the bridge',
-    cost: 2,
-    term: 'Days without road down',
-    leaf: '0',
-    people: '+ every storm',
-    coin: '+ (market trucks keep coming)',
-  },
-  {
-    id: 'plant',
-    label: 'Plant the riverbank and the burned ridge',
-    cost: 1,
-    term: 'Bank vegetation up from year 2; bare ground down from year 2',
-    leaf: '++ (slow)',
-    people: '+ from year 3',
-    coin: '0 now, + later (fewer repairs)',
-  },
-  {
-    id: 'clear',
-    label: 'Clear trees and brush around every house',
-    cost: 1,
-    term: 'Bare ground up',
-    leaf: '− (more runoff, more mud)',
-    people: '+ (no fallen trees)',
-    coin: '0',
-  },
-  {
-    id: 'rebuild',
-    label: 'Rebuild the five houses on their slabs, fast',
-    cost: 1,
-    term: 'Nothing in the rule',
-    leaf: '0',
-    people: '+ this month, − next storm',
-    coin: '+ (cheapest now)',
-  },
+  { id: 'concrete', label: 'Concrete the riverbank', cost: 2, tradeoff: 'Keeps water off these houses but removes the bank trees, so water reaches the bay and the downstream houses faster. Needs repair every few years.' },
+  { id: 'dredge', label: 'Dredge the river mouth, dump spoil on the reef flat', cost: 1, tradeoff: 'Less flooding this year; the buried reef stops breaking waves, so surge is higher from year 3.' },
+  { id: 'bridge', label: 'Raise the bridge', cost: 2, tradeoff: 'The road stays open in storms, so trucks, ambulances and supplies get through.' },
+  { id: 'plant', label: 'Replant the riverbank and the burned ridge', cost: 1, tradeoff: 'Slow: little effect until year 2 or 3, then less flooding and less mud in the bay.' },
+  { id: 'clear', label: 'Clear trees and brush around every house', cost: 1, tradeoff: 'No falling trees on roofs, but more bare ground and more mud.' },
+  { id: 'rebuild', label: 'Rebuild the five houses on their old slabs, fast', cost: 1, tradeoff: 'Families are home this month; the houses are in the same flood zone for the next storm.' },
 ];
 
 export const COINS = 4;
@@ -99,7 +52,8 @@ export function depthWord(d) {
   return 'waist-deep';
 }
 
-// plan: Set of approach ids. extras: { debris: 'burn'|'dump'|'chip'|null, vote: { houseId: 'same'|'stilts'|'uphill' } | null }
+// plan: Set of approach ids. extras: { debris: 'burn'|'dump'|'chip'|null, vote: { houseId: 'same'|'stilts'|'uphill' } | null,
+//   flags: { ridge_strip, water_kit } } — carry-overs from scenarios played earlier.
 export function runRule(plan, extras = {}) {
   const has = (id) => plan.has(id);
   const vote = extras.vote || {};
@@ -125,7 +79,8 @@ export function runRule(plan, extras = {}) {
     else if (has('plant') && t >= 3) moved.bank = 'bank vegetation up (planted bank)';
     if (uphill && t >= 2 && !has('concrete')) moved.slabs = 'old slabs now riverbank';
 
-    let bare = BASE.bare - (has('plant') ? PLANT_BARE[t] : 0) + (has('clear') ? 0.2 : 0);
+    const ridgeStrip = extras.flags?.ridge_strip ? 0.15 : 0; // Rosa's planted strip: less mud off the ridge
+    let bare = BASE.bare - ridgeStrip - (has('plant') ? PLANT_BARE[t] : 0) + (has('clear') ? 0.2 : 0);
     if (extras.debris === 'burn' && t <= 2) {
       bare += 0.15;
       moved.debris = 'bare ground up (burned riverbank)';
@@ -189,17 +144,18 @@ export function runRule(plan, extras = {}) {
       leaf: Math.round(clamp(leaf, 0, 100)),
       people: Math.round(clamp(people, 0, 100)),
       coin: Math.round(clamp(coin, 0, 100)),
-      line: yearLine({ t, storm, street, down, daysNoRoad, reef, mud, moved, has }),
+      line: yearLine({ t, storm, street, down, daysNoRoad, reef, mud, moved, has }) + (storm && extras.flags?.water_kit ? ' Nina’s family has stored water.' : ''),
     });
 
     // Feedback into next year's reef: mud smothers it, calm years let it recover, dredge spoil buries it.
-    let next = reef - COEF.mudToReef * mud + (storm ? 0 : COEF.reefRecovery);
+    // Calm years let the reef recover, faster when little mud reaches it.
+    let next = reef - COEF.mudToReef * mud + (storm ? 0 : mud < 0.3 ? COEF.clearRecovery : COEF.reefRecovery);
     if (has('dredge') && t === 1) next -= 0.3;
     if (has('dredge') && t === 2) next -= 0.15;
     reef = clamp(next, 0.1, 1);
   }
 
-  return { frames, summary: summarize(frames, plan, extras) };
+  return { frames, summary: summarize(frames, plan, extras, reef) };
 }
 
 function reefWord(r) {
@@ -225,34 +181,32 @@ function yearLine({ t, storm, street, down, daysNoRoad, reef, mud, moved, has })
   return `Rainy season. ${mudWord[0].toUpperCase()}${mudWord.slice(1)} mud to the bay; reef ${reefWord(reef)}.${terms.length ? ` Moved by: ${terms.join('; ')}.` : ''}`;
 }
 
-// The year-5 line, assembled from the frames.
-function summarize(frames, plan, extras = {}) {
+// The year-5 line, assembled from the frames (wording from the master script's samples).
+function summarize(frames, plan, extras = {}, finalReef = frames[4].reef) {
   const y2 = frames[1];
   const y4 = frames[3];
   const parts = [];
-  parts.push(
-    y2.street < 0.3
-      ? 'Year 2 was dry on this street.'
-      : `Year 2 flooded this street again${y2.daysNoRoad <= 1 ? ', with the road open' : ''}.`,
-  );
-  if (y4.reef < 0.5) parts.push('By year 4 the reef flat is half buried and the surge comes in higher.');
-  else if (plan.has('plant')) parts.push('By year 4 the bank held and the ridge sent down less mud.');
-  if (plan.has('concrete')) parts.push(`The houses downstream took what this street didn't${y2.down > 0.3 && y4.down > 0.3 ? ', in both storms' : ''}.`);
+  const bothDry = y2.street < 0.3 && y4.street < 0.3;
+  if (plan.has('bridge') && plan.has('concrete') && bothDry && !plan.has('dredge')) {
+    parts.push('Dry street and open road in both storms. The three houses downstream flooded both times, and the bay gets browner each year without the bank trees.');
+  } else {
+    parts.push(y2.street < 0.3 ? 'Year 2 was dry on this street.' : `Year 2 flooded this street again${y2.daysNoRoad <= 1 ? ', but the road stayed open' : ''}.`);
+  }
+  if (y4.reef < 0.5) {
+    parts.push(`By year 4 the reef flat is half buried, the surge comes in higher${plan.has('concrete') ? ", and the houses downstream took the water this street didn't" : ''}.`);
+  } else if (plan.has('plant')) {
+    parts.push(`By year 4 the bank held, the ridge sent down half the mud${finalReef > frames[1].reef ? ', and the reef was clearer than before the first storm' : ''}.`);
+  }
   const brownSince = frames.find((f) => f.reef < 0.5);
-  if (plan.has('concrete') && !plan.has('dredge')) parts.push('The bay is browner each year because the bank trees are gone.');
-  else if (brownSince) parts.push(`The bay has been brown since year ${brownSince.year}.`);
-  else if (frames[4].reef > frames[2].reef) parts.push('By year 5 the reef was clearer than after the first storm.');
-  if (plan.has('bridge')) parts.push('The road opened within a day after both storms.');
+  if (!(plan.has('bridge') && plan.has('concrete') && bothDry && !plan.has('dredge')) && brownSince) parts.push(`The bay has been brown since year ${brownSince.year}.`);
   if (extras.debris === 'chip') parts.push('The chipped debris kept bare ground down above the village through the first wet season.');
-  if (extras.debris === 'burn') parts.push('The burned riverbank stayed bare for a year, and its ash reached the bay with the first rain.');
+  if (extras.debris === 'burn') parts.push('The burned riverbank stayed bare, and its ash reached the bay with the first rain.');
   const vote = extras.vote;
   if (vote) {
     const moved = DAMAGED.filter((h) => vote[h] === 'uphill').length;
     const raised = DAMAGED.filter((h) => vote[h] === 'stilts').length;
-    const deepest = Math.max(...frames.map((f) => Math.max(f.street, f.down)));
-    if (moved + raised === DAMAGED.length && (raised === 0 || deepest < 2)) {
-      parts.push(`The five houses that were raised or moved stayed out of the water${moved ? `, and ${moved === 1 ? 'one old slab is' : `${moved} old slabs are`} riverbank now` : ''}.`);
-    } else if (moved + raised === 0) parts.push('The five houses went back on the same slabs.');
+    if (moved + raised === DAMAGED.length) parts.push('The five families who rebuilt raised or on the school lot stayed out of the water.');
+    else if (moved + raised === 0) parts.push('The five houses went back on the same slabs.');
   }
   return parts.join(' ');
 }

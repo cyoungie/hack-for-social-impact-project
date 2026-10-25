@@ -2,6 +2,7 @@
 // Everything that changes with the player's choices is a prop.
 //   field:  'plowed' | 'mulch' | 'seedlings' | 'bare' | 'contour' | 'furrows'
 //   crops:  null | 'healthy' | 'poor'
+//   strip:  null | 'planted' | 'channel' | 'nothing' — what sits at the top of the field
 //   muddy:  stream runs brown, with a mud fan in the bay
 //   reefGrey, plume: the reef has bleached / a nutrient plume runs to it
 
@@ -53,6 +54,36 @@ function RainCloud() {
       </g>
     </g>
   );
+}
+
+// The ridge behind the farm, burned every dry season: black and bare patches on the slope.
+function BurnedRidge() {
+  return (
+    <g className="fs-burn">
+      <rect x="300" y="196" width="160" height="34" />
+      <rect x="520" y="190" width="220" height="42" />
+      <rect x="800" y="206" width="160" height="30" />
+      <rect className="fs-burn__ash" x="360" y="210" width="60" height="14" />
+      <rect className="fs-burn__ash" x="600" y="204" width="90" height="16" />
+    </g>
+  );
+}
+
+function Strip({ kind }) {
+  if (kind === 'planted') {
+    return (
+      <g className="fs-strip">
+        {Array.from({ length: 22 }, (_, i) => (
+          <g key={i}>
+            <rect x={326 + i * 30} y="282" width="18" height="14" />
+            {i % 3 === 0 && <rect className="fs-strip__tree" x={330 + i * 30} y="262" width="10" height="22" />}
+          </g>
+        ))}
+      </g>
+    );
+  }
+  if (kind === 'channel') return <rect className="fs-channel" x="320" y="284" width="690" height="12" />;
+  return null;
 }
 
 function Hills() {
@@ -284,7 +315,7 @@ function Bay({ muddy, reefGrey, plume }) {
   );
 }
 
-export default function FarmScene({ field = 'plowed', crops = null, muddy = false, reefGrey = false, plume = false }) {
+export default function FarmScene({ field = 'plowed', crops = null, strip = null, muddy = false, reefGrey = false, plume = false }) {
   return (
     <svg className="farm" viewBox="0 0 1440 760" preserveAspectRatio="none" shapeRendering="crispEdges" aria-hidden="true">
       <rect className="fs-sky" x="0" y="0" width="1440" height="260" />
@@ -292,6 +323,7 @@ export default function FarmScene({ field = 'plowed', crops = null, muddy = fals
       <PuffCloud x={120} y={50} />
       <PuffCloud x={1010} y={84} s={0.8} />
       <Hills />
+      <BurnedRidge />
       <RainCloud />
       <rect className="fs-grass" x="0" y="250" width="1440" height="510" />
       {TUFTS.map(([a, b], i) => {
@@ -312,6 +344,7 @@ export default function FarmScene({ field = 'plowed', crops = null, muddy = fals
       <Palm x={286} y={262} flip />
       <Palm x={1196} y={300} />
       <Palm x={1300} y={420} flip />
+      <Strip kind={strip} />
       <FieldSurface field={field} />
       {crops && <Crops quality={crops} />}
       <Tractor />

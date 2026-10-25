@@ -1,7 +1,7 @@
 {
   "id": 4,
-  "title": "Fresh Water & Conservation",
-  "location": "North Village",
+  "title": "Fresh Water",
+  "location": "Water Tower",
   "background": "/scenes/scene4.png",
   "persona": {
     "name": "Ana",
@@ -9,8 +9,9 @@
     "tint": "#5BA8E0"
   },
   "intro": [
-    "Hi! Are you new around here? I'm Ana. Since the last typhoon, our water has come and gone, and last month the tap ran cloudy for a day. My brother says the water we drink comes from a lens of fresh water floating on top of the sea, right under our feet, and that if we pump too much or pollute it, it's very hard to fix.",
-    "Our house sits right over it, with an old septic tank in the yard, and nobody has shown me where our water really goes.",
-    "Will you help me keep our water safe and enough for everyone, in good weather and after storms?"
+    "Hi, are you the one staying with the Cruz family? I’m Ana. Since the last typhoon our water keeps cutting out, and last month it came out cloudy for a whole day.",
+    "My brother works for the water utility. He says all our drinking water comes from underground, a layer of fresh water floating on salt water, and that it’s easy to ruin and hard to fix.",
+    "We’ve got an old septic tank in the yard right on top of it.",
+    "I’d like to know what I can actually do."
   ]
 }

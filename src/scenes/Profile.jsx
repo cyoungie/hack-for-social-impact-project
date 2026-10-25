@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGame, dayKey } from '../state/GameState.jsx';
 import { PROBLEMS, avatarColorValue } from '../data/game.js';
-import { SCENARIOS, isBuilt, lockedBy } from '../scenarios/index.js';
+import { SCENARIOS, isBuilt } from '../scenarios/index.js';
 import { Nav, PixelButton, PixelCard } from '../components/ui.jsx';
 import { Avatar } from '../components/Avatar.jsx';
 import { Icon } from '../components/Icons.jsx';
@@ -28,7 +28,6 @@ function pathStatus(p, state) {
     const stops = SCENARIOS[p.id].hotspots.length;
     return { id: 'progress', label: `In progress · ${Object.keys(state.run.done).length}/${stops} stops` };
   }
-  if (lockedBy(p.id, state.solvedProblems)) return { id: 'locked', label: 'Locked' };
   if (!isBuilt(p.id)) return { id: 'soon', label: 'Intro only — gameplay in production' };
   return { id: 'open', label: 'Ready to play' };
 }
@@ -39,7 +38,7 @@ export default function Profile() {
   const solved = state.solvedProblems;
   const cards = solved.filter((id) => SCENARIOS[id]);
   const streak = dayStreak(state.playDays);
-  const nextUp = PROBLEMS.find((p) => isBuilt(p.id) && !solved.includes(p.id) && !lockedBy(p.id, solved));
+  const nextUp = (state.run && PROBLEMS.find((p) => p.id === state.run.id)) || PROBLEMS.find((p) => isBuilt(p.id) && !solved.includes(p.id));
 
   return (
     <div className="app-shell">
@@ -82,31 +81,26 @@ export default function Profile() {
 
         <section className="profile__section" aria-labelledby="path-title">
           <h2 id="path-title" className="profile__h2">
-            Your path · Tropical Island
+            Your summer · Tropical Island
           </h2>
           <ol className="path">
             {PROBLEMS.map((p) => {
               const status = pathStatus(p, state);
-              const canOpen = status.id !== 'locked';
-              const Tag = canOpen ? 'button' : 'div';
               return (
                 <li key={p.id} className={`path__step is-${status.id}`}>
-                  <Tag
-                    {...(canOpen ? { type: 'button', onClick: () => openIntro(p.id) } : {})}
+                  <button
+                    type="button"
+                    onClick={() => openIntro(p.id)}
                     className="path__node"
                     style={{ '--node': p.color }}
-                    aria-label={`${p.n}. ${p.title} — ${status.label}`}
+                    aria-label={`${p.place}, ${p.resident} — ${status.label}`}
                   >
-                    {status.id === 'done' ? (
-                      <Icon name="check" size={26} strokeWidth={3} />
-                    ) : status.id === 'locked' ? (
-                      <Icon name="lock" size={22} />
-                    ) : (
-                      p.n
-                    )}
-                  </Tag>
+                    {status.id === 'done' ? <Icon name="check" size={26} strokeWidth={3} /> : p.n}
+                  </button>
                   <div className="path__text">
-                    <span className="path__title">{p.title}</span>
+                    <span className="path__title">
+                      {p.place} · {p.resident}
+                    </span>
                     <span className="path__status">{status.label}</span>
                   </div>
                 </li>

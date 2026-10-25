@@ -1,18 +1,15 @@
 import { useMemo, useRef, useState } from 'react';
 import { PixelButton } from '../../components/ui.jsx';
-import { Icon } from '../../components/Icons.jsx';
 import { usePick } from '../../components/usePick.js';
 import { compareWith } from '../../data/scoring.js';
 import YearStrip from '../typhoon/YearStrip.jsx';
 import ReefMap, { CUT_BOX, ROUTE_LINES } from './ReefMap.jsx';
 import { CONTROLS, ROUTES, runReef } from './rule.js';
 
-const WORST = runReef({ route: 'straight', controls: new Set() });
-
 // Points for the plan you keep: its year-5 bars against the cheapest road with no controls.
-function planPoints(result) {
+function planPoints(result, start) {
   const y5 = result.frames[4];
-  const w5 = WORST.frames[4];
+  const w5 = runReef({ route: 'straight', controls: new Set() }, start).frames[4];
   return { veg: Math.round((y5.leaf - w5.leaf) / 5), people: Math.round((y5.people - w5.people) / 5) };
 }
 
@@ -39,18 +36,10 @@ function nearestRoute(trail) {
   return best.id;
 }
 
-function Effects({ item }) {
+function Foreman({ text }) {
   return (
-    <span className="approach__icons">
-      <span title="Leaf — mud and reef">
-        <Icon name="grass" size={14} /> {item.leaf}
-      </span>
-      <span title="People — jobs, road access">
-        <Icon name="people" size={14} /> {item.people}
-      </span>
-      <span title="Coin — cost and schedule">
-        <Icon name="coin" size={14} /> {item.coin}
-      </span>
+    <span className="foreman">
+      <span className="label">Foreman</span> “{text}”
     </span>
   );
 }
@@ -121,7 +110,7 @@ function Planner({ onRun }) {
               <button key={r.id} type="button" className={`approach__main ${route === r.id ? 'is-picked-route' : ''}`} aria-pressed={route === r.id} onClick={() => setRoute(r.id)}>
                 <span className="approach__label">{r.label}</span>
                 <span className="caption">{r.note}</span>
-                {route === r.id && <Effects item={r} />}
+
               </button>
             ))}
           </div>
@@ -148,7 +137,7 @@ function Planner({ onRun }) {
               {CONTROLS.filter((c) => controls.has(c.id)).map((c) => (
                 <li key={c.id}>
                   <span className="approach__label">{c.label}</span>
-                  <Effects item={c} />
+                  <Foreman text={c.foreman} />
                   <button type="button" className="approach__undo" onClick={() => remove(c.id)}>
                     Remove
                   </button>
@@ -172,17 +161,17 @@ export default function RoadPlan({ config, onComplete }) {
   const [plans, setPlans] = useState([]);
   const [planning, setPlanning] = useState(true);
   const [played, setPlayed] = useState(0);
-  const results = useMemo(() => plans.map((p) => runReef(p, config.extras)), [plans, config.extras]);
+  const results = useMemo(() => plans.map((p) => runReef(p, config.start)), [plans, config.start]);
 
   const keep = (i) => {
     const r = results[i];
     const other = results[1 - i];
     onComplete({
-      points: planPoints(r),
+      points: planPoints(r, config.start),
       feedback: `${planName(plans[i])}. ${r.summary}`,
       verdict: r.finalReef >= 0.5 ? 'correct' : r.finalReef >= 0.2 ? 'ok' : 'wrong',
       state: { route: plans[i].route, controls: [...plans[i].controls], finalReef: r.finalReef },
-      compare: other ? compareWith(planName(plans[1 - i]), planPoints(other), other.summary) : undefined,
+      compare: other ? compareWith(planName(plans[1 - i]), planPoints(other, config.start), other.summary) : undefined,
     });
   };
 
@@ -193,7 +182,7 @@ export default function RoadPlan({ config, onComplete }) {
       result={results[i]}
       instant={instant}
       onDone={() => setPlayed((n) => Math.max(n, i + 1))}
-      renderMap={(f) => <ReefMap route={plans[i].route} controls={plans[i].controls} frame={f} drain={config.extras?.drain} label={`Year ${f.year} map`} />}
+      renderMap={(f) => <ReefMap route={plans[i].route} controls={plans[i].controls} frame={f} label={`Year ${f.year} map`} />}
     />
   );
 

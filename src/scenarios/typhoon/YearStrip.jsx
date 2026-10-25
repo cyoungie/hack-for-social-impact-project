@@ -55,8 +55,7 @@ export default function YearStrip({ title, result, plan, vote, onDone, instant =
               {renderMap ? renderMap(f) : <VillageMap frame={f} plan={plan} vote={vote} label={`Year ${f.year} map`} />}
               <span className="yframe__year">
                 Year {f.year}
-                {f.heat && ' · Heat wave'}
-                {f.storm && (f.heat === undefined ? ' · Storm' : ' · Big storm')}
+                {f.event ? ` · ${f.event}` : f.heat ? ' · Heat wave' : f.storm ? (f.heat === undefined ? ' · Storm' : ' · Big storm') : ''}
               </span>
             </div>
             <div className="yframe__body">
@@ -67,6 +66,7 @@ export default function YearStrip({ title, result, plan, vote, onDone, instant =
         ))}
       </ol>
       {shown >= 5 && <p className="ystrip__summary">{result.summary}</p>}
+      <p className="caption">Illustrative, not a forecast: the point is direction and relative size.</p>
     </section>
   );
 }

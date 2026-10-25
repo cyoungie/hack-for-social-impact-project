@@ -1,6 +1,6 @@
 {
   "id": 2,
-  "title": "Typhoon",
+  "title": "After the Typhoon",
   "location": "River",
   "background": "/scenes/scene2.png",
   "persona": {
@@ -9,8 +9,9 @@
     "tint": "#A78BFA"
   },
   "intro": [
-    "Are you new around here? A typhoon came through two nights ago. We were able to stay safe, but look at the damage!",
-    "I’m Nina, by the way, and my 2 kids and mother are still staying at the shelter. Everyone keeps saying the next storm will be worse.",
-    "Help me figure out what this village should do before it comes."
+    "Hi, sorry, it’s been a long couple of days. I’m Nina. The typhoon came through Tuesday night and the river came right up into our house.",
+    "My mom and my two kids are still sleeping at the school.",
+    "The village is getting recovery money and there’s a meeting Saturday about how to spend it and whether people rebuild where they were.",
+    "I want to have an opinion before I walk in. Can you help me think it through?"
   ]
 }

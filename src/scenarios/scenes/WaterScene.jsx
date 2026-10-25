@@ -3,11 +3,9 @@
 //   leaksFixed: the leaking pipe was found and reported
 //   septic: null | 'leave' | 'pump' | 'upgrade' | 'sewer'
 //   stocked: the pantry is stocked for the typhoon
-//   wastersFixed: sprinkler off, hose off
-//   council: null | number of helpful cards passed
 //   outcome: null | 'good' | 'bad'
 
-export default function WaterScene({ chloride = null, leaksFixed = false, septic = null, stocked = false, wastersFixed = false, council = null, outcome = null }) {
+export default function WaterScene({ chloride = null, leaksFixed = false, septic = null, stocked = false, outcome = null }) {
   const cone = chloride === null ? 0 : Math.max(0, chloride - 30) * 2.2;
   const lensTop = outcome === 'bad' ? 600 : 560;
   return (
@@ -69,7 +67,6 @@ export default function WaterScene({ chloride = null, leaksFixed = false, septic
       </g>
       <rect className="ws-barrel" x="790" y="284" width="34" height="46" />
       <rect className="ws-faucet" x="456" y="296" width="14" height="8" />
-      {!wastersFixed && <rect className="ws-spray" x="440" y="310" width="20" height="6" />}
 
       {/* Septic tank in the yard */}
       <rect className="ws-lid" x="520" y="352" width="80" height="14" />
@@ -87,25 +84,6 @@ export default function WaterScene({ chloride = null, leaksFixed = false, septic
       ) : (
         <rect className="ws-patch" x="894" y="368" width="24" height="22" />
       )}
-
-      {/* Village hall */}
-      <g>
-        <rect className="rs-wall ws-hall" x="1080" y="196" width="280" height="134" />
-        <rect className="ws-pediment" x="1064" y="170" width="312" height="28" />
-        {[1104, 1164, 1224, 1284, 1336].map((x) => (
-          <rect key={x} className="ws-column" x={x} y="210" width="14" height="120" />
-        ))}
-        <rect className="rs-door" x="1204" y="270" width="36" height="60" />
-        <text x="1146" y="190" className="ws-txt ws-txt--light">VILLAGE HALL</text>
-        {council !== null && (
-          <g>
-            <rect className={`ws-banner ${council >= 3 ? 'is-good' : ''}`} x="1110" y="226" width="220" height="30" />
-            <text x="1220" y="246" textAnchor="middle" className="ws-txt">
-              {council} OF 3 PASSED
-            </text>
-          </g>
-        )}
-      </g>
 
       {/* Cutaway: limestone, the freshwater lens, seawater */}
       <rect className="lc-limestone" x="0" y="400" width="1440" height={lensTop - 400} />

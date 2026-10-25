@@ -5,15 +5,15 @@ import VillageMap from './VillageMap.jsx';
 import { DAMAGED } from './rule.js';
 
 const ATTEND = [
-  { id: 'speak', label: 'Go, and speak' },
-  { id: 'listen', label: 'Go, and listen' },
+  { id: 'speak', label: 'Go and give public comment' },
+  { id: 'listen', label: 'Go and listen' },
   { id: 'skip', label: 'Skip it' },
 ];
 
 const SPOTS = [
-  { id: 'same', label: 'Same spot', note: '' },
-  { id: 'stilts', label: 'Raised on stilts', note: 'coin 1.5×' },
-  { id: 'uphill', label: 'Uphill by the school', note: 'people − from the move; the old slabs become riverbank, which raises bank vegetation' },
+  { id: 'same', label: 'Rebuild on the same slab', note: '' },
+  { id: 'stilts', label: 'Rebuild raised on posts', note: 'Costs more.' },
+  { id: 'uphill', label: 'Move to the village lot by the school', note: 'The grant covers it, but the family moves farther from the river and their boats.' },
 ];
 
 // Build back better: go to the rebuild meeting, then vote where the five damaged houses go.
@@ -25,12 +25,16 @@ export default function MeetingVote({ config, onComplete }) {
 
   const finish = (attendId, v) => {
     const allOut = DAMAGED.every((h) => v[h] && v[h] !== 'same');
-    const r = attendId === 'skip' ? config.skip : attendId === 'speak' && allOut ? config.speakOut : config.listen;
+    const moved = attendId === 'speak' && allOut;
+    const r = attendId === 'skip' ? config.skip : moved ? config.speakOut : config.listen;
+    // Without public comment that moves the houses out, most grants go to same-spot rebuilds.
+    const sameSlabs = Object.fromEntries(DAMAGED.map((h) => [h, 'same']));
     onComplete({
       points: r.points,
       feedback: r.feedback,
-      verdict: r === config.speakOut ? 'correct' : r === config.listen ? 'ok' : 'wrong',
-      state: { attend: attendId, vote: attendId === 'skip' ? Object.fromEntries(DAMAGED.map((h) => [h, 'same'])) : v },
+      verdict: moved ? 'correct' : attendId === 'listen' ? 'ok' : 'wrong',
+      state: { attend: attendId, vote: moved ? v : sameSlabs },
+      setFlags: { bank_planted: moved },
     });
   };
 
@@ -61,7 +65,7 @@ export default function MeetingVote({ config, onComplete }) {
   const placed = Object.keys(vote).length;
   return (
     <div className="prim">
-      <p className="caption">The baseline map, with the five damaged houses marked. Drag each house to where it should be rebuilt.</p>
+      <p className="caption">The map, with the damaged houses marked. Drag a recommendation onto each house.</p>
       <div className="meeting">
         <VillageMap layers={{ flood: true }} vote={vote} label="Village map showing where each damaged house goes" />
         <div className="meeting__side">
@@ -95,7 +99,7 @@ export default function MeetingVote({ config, onComplete }) {
         </div>
       </div>
       <PixelButton className="pbtn--block" disabled={placed < DAMAGED.length} onClick={() => finish(attend, vote)}>
-        Cast vote
+        Submit comment
       </PixelButton>
     </div>
   );

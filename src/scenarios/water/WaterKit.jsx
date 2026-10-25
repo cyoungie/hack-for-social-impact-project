@@ -50,14 +50,15 @@ export default function WaterKit({ config, onComplete }) {
     if (phase !== 'outage') return undefined;
     if (day >= OUTAGE_DAYS) {
       const o = resultRef.current;
-      const tier = o.days >= OUTAGE_DAYS && (!o.barrel || o.kit) ? config.tiers.full : o.days >= 3 ? config.tiers.part : config.tiers.short;
+      // Untreated rain-barrel water lands in the worst tier, whatever the day count.
+      const tier = o.drankUntreated ? config.tiers.short : o.days >= OUTAGE_DAYS ? config.tiers.full : o.days >= 3 ? config.tiers.part : config.tiers.short;
       const points = o.drankUntreated ? addPoints(tier.points, config.untreated.points) : tier.points;
       const t = setTimeout(
         () =>
           doneRef.current({
             ...tier,
             points,
-            feedback: `Your supply lasted ${o.days} of ${OUTAGE_DAYS} days. ${tier.feedback}${o.drankUntreated ? ` ${config.untreated.feedback}` : ''}`,
+            feedback: `Your supply lasted ${o.days} of ${OUTAGE_DAYS} days. ${tier.feedback}`,
             verdict: tier === config.tiers.full && !o.drankUntreated ? 'correct' : tier === config.tiers.short ? 'wrong' : 'ok',
             state: { days: o.days, packed },
           }),

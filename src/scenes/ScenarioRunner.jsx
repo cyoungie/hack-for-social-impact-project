@@ -8,8 +8,9 @@ import { Avatar } from '../components/Avatar.jsx';
 import { Icon } from '../components/Icons.jsx';
 import { Dialog } from '../components/Dialog.jsx';
 import { PointChips } from '../components/PointChips.jsx';
-import { WaterNote } from '../components/WaterNote.jsx';
+import { SourceCard } from '../components/SourceCard.jsx';
 import ChoiceCard from '../primitives/ChoiceCard.jsx';
+import StripChoice from '../primitives/StripChoice.jsx';
 import TillerPlan from '../primitives/TillerPlan.jsx';
 import FertilizerPlan from '../primitives/FertilizerPlan.jsx';
 import RiskMap from '../scenarios/typhoon/RiskMap.jsx';
@@ -21,13 +22,14 @@ import LensKeeper from '../scenarios/water/LensKeeper.jsx';
 import LeakHunt from '../scenarios/water/LeakHunt.jsx';
 import FollowDrop from '../scenarios/water/FollowDrop.jsx';
 import WaterKit from '../scenarios/water/WaterKit.jsx';
-import WaterDetective from '../scenarios/water/WaterDetective.jsx';
-import VillageCouncil from '../scenarios/water/VillageCouncil.jsx';
-import TownAction from '../scenarios/town/TownAction.jsx';
+import MapCases from '../scenarios/town/MapCases.jsx';
+import EffortPlan from '../scenarios/town/EffortPlan.jsx';
+import TownHall from '../scenarios/town/TownHall.jsx';
 import KnowledgeCard from './KnowledgeCard.jsx';
 
 const PRIMITIVES = {
   choice: ChoiceCard,
+  strip: StripChoice,
   till: TillerPlan,
   fertilizer: FertilizerPlan,
   riskmap: RiskMap,
@@ -39,12 +41,13 @@ const PRIMITIVES = {
   leakhunt: LeakHunt,
   followdrop: FollowDrop,
   waterkit: WaterKit,
-  detective: WaterDetective,
-  council: VillageCouncil,
-  town: TownAction,
+  cases: MapCases,
+  effort: EffortPlan,
+  townhall: TownHall,
 };
 
-const VERDICT = { correct: 'Good call', ok: 'Partly there', wrong: 'Not quite' };
+// Good choices open with what happened; poor ones with what went wrong. No praise.
+const VERDICT = { correct: 'What happened', ok: 'What happened', wrong: 'What went wrong' };
 
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
@@ -66,74 +69,35 @@ function DialogueBox({ persona, text, cta, onNext }) {
   );
 }
 
-// Gameplay for a built scenario, mounted inside GameScene. Phases: explore -> consequence -> card.
-function RuleCard({ rule, onClose }) {
-  return (
-    <Dialog labelledBy="rule-title" onClose={onClose}>
-      <div className="kcard__eyebrow">
-        <span className="label">Documented</span>
-        <button type="button" className="hdialog__close" onClick={onClose}>
-          Close
-        </button>
-      </div>
-      <h2 id="rule-title" className="kcard__title">
-        {rule.title}
-      </h2>
-      <p className="caption">{rule.intro}</p>
-      {rule.lines.map((l) => (
-        <p key={l} className="rule__line">
-          {l}
-        </p>
-      ))}
-      <table className="rule__coef">
-        <caption className="label">Coefficients</caption>
-        <tbody>
-          {rule.coefficients.map(([name, v, src]) => (
-            <tr key={name}>
-              <th scope="row">{name}</th>
-              <td>{v}</td>
-              <td>{src}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <ul className="kcard__links">
-        {rule.sources.map((l) => (
-          <li key={l.href}>
-            <a href={l.href} target="_blank" rel="noopener noreferrer">
-              {l.label}
-              <Icon name="external" size={14} />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </Dialog>
-  );
-}
-
+// Gameplay for a built scenario, mounted inside GameScene.
+// Phases: baseline -> explore -> consequence (five-year outlook, closing line) -> card.
 export default function ScenarioRunner({ scenario: sc, content }) {
   const { state, setPhase, completeHotspot, collect, goTo } = useGame();
   const { run } = state;
   const persona = { ...sc.persona, color: content.persona.tint };
   const [openId, setOpenId] = useState(null);
   const [result, setResult] = useState(null);
-  const [ruleOpen, setRuleOpen] = useState(false);
+  const [baselineOpen, setBaselineOpen] = useState(false);
   const [finaleSeen, setFinaleSeen] = useState(false);
   const [recent, setRecent] = useState(null);
   const [pos, setPos] = useState({ x: 50, y: 92 });
   const timer = useRef(null);
 
   const done = run.done;
+  // Carry-over flags as they stood when this scenario started.
+  const flags = run.flags || {};
+  // Some stops only appear after an earlier choice (e.g. the town hall in Scenario 5).
+  const hotspots = sc.hotspots.filter((h) => !h.when || h.when(done, flags));
   // Sequential scenarios unlock each stop once the one before it is done.
   const waiting = (h) => {
     if (!sc.sequential) return false;
-    const i = sc.hotspots.indexOf(h);
-    return i > 0 && !done[sc.hotspots[i - 1].id];
+    const i = hotspots.indexOf(h);
+    return i > 0 && !done[hotspots[i - 1].id];
   };
   const totals = useMemo(() => sumPoints(Object.values(done).map((d) => d.points)), [done]);
-  const allDone = sc.hotspots.every((h) => done[h.id]);
-  const open = sc.hotspots.find((h) => h.id === openId);
-  const outcome = sc.outcome(totals, done);
+  const allDone = hotspots.every((h) => done[h.id]);
+  const open = hotspots.find((h) => h.id === openId);
+  const outcome = sc.outcome(totals, done, flags);
   const showOutcome = run.phase === 'consequence' || run.phase === 'card';
   const Primitive = open && PRIMITIVES[open.kind];
 
@@ -144,16 +108,18 @@ export default function ScenarioRunner({ scenario: sc, content }) {
     timer.current = setTimeout(() => setOpenId(h.id), reducedMotion() ? 0 : 380);
   };
 
-  // Mini-games can be retried (sc.retries times); the best score is the one kept.
+  // Mini-games (not plain choices) can be retried once; the best score is the one kept.
   const scoreOf = (r) => Object.values(r.points || {}).reduce((a, b) => a + b, 0);
-  const finishHotspot = (r) => {
+  const finishHotspot = (res) => {
+    // A stop can set carry-over flags from its result (e.g. fertilizing before the storm -> farm_runoff).
+    const r = open.flags ? { ...res, setFlags: { ...res.setFlags, ...open.flags(res) } } : res;
     const prev = done[open.id];
     const attempts = (prev?.attempts || 0) + 1;
     const kept = prev && scoreOf(prev) > scoreOf(r) ? prev : r;
     completeHotspot(open.id, { ...kept, attempts });
     setResult({ ...r, attempts, keptEarlier: kept === prev });
   };
-  const canRetry = result && sc.retries && result.attempts <= sc.retries;
+  const canRetry = result && !['choice', 'strip'].includes(open?.kind) && result.attempts <= 1;
 
   const closeHotspot = () => {
     if (result) {
@@ -175,7 +141,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
           >
             {sc.Scene ? (
               <div className="scenery" aria-hidden="true">
-                <sc.Scene {...sc.sceneState(done, showOutcome ? outcome : null)} />
+                <sc.Scene {...sc.sceneState(done, showOutcome ? outcome : null, flags)} />
               </div>
             ) : (
               <Scenery
@@ -189,7 +155,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
             {sc.Hud && <sc.Hud done={done} />}
 
             {!showOutcome &&
-              sc.hotspots.map((h) =>
+              hotspots.map((h) =>
               h.box ? (
                 // Illustrated scenes: the drawn object itself is the hotspot.
                 <button
@@ -272,7 +238,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
               {run.phase === 'explore' ? 'Click a spot on the scene' : 'Stops'}
             </h1>
             <ol className="stops__list">
-              {sc.hotspots.map((h) => (
+              {hotspots.map((h) => (
                 <li key={h.id} className={`stop ${done[h.id] ? 'is-done' : ''}`}>
                   <span className="stop__box" aria-hidden="true">
                     {done[h.id] && <Icon name="check" size={12} strokeWidth={3} />}
@@ -293,9 +259,9 @@ export default function ScenarioRunner({ scenario: sc, content }) {
 
           {sc.Rail && <sc.Rail done={done} />}
 
-          {sc.ruleCard && (
-            <button type="button" className="pbtn pbtn--ghost pbtn--block rule-btn" onClick={() => setRuleOpen(true)}>
-              Open the rule
+          {sc.Baseline && (
+            <button type="button" className="pbtn pbtn--ghost pbtn--block rule-btn" onClick={() => setBaselineOpen(true)}>
+              Baseline map
             </button>
           )}
           {run.phase === 'explore' && allDone && (
@@ -305,8 +271,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
           )}
           {run.phase === 'explore' && !allDone && (
             <p className="caption">
-              {Object.keys(done).length} of {sc.hotspots.length} stops done. Each choice shows what it does to the land —
-              and what the other choice would have done.
+              {Object.keys(done).filter((id) => hotspots.some((h) => h.id === id)).length} of {hotspots.length} stops done.
             </p>
           )}
         </aside>
@@ -336,6 +301,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
                 </p>
               )}
               <p>{result.feedback}</p>
+              {(result.source || open.source) && <SourceCard card={result.source || open.source} />}
               <PointChips points={result.points} emptyText="No change to the bars." />
               {result.links && (
                 <ul className="kcard__links feedback__links">
@@ -357,7 +323,6 @@ export default function ScenarioRunner({ scenario: sc, content }) {
                   <p className="compare__note">{result.compare.note}</p>
                 </div>
               )}
-              {(result.note || open.note) && <WaterNote note={result.note || open.note} />}
               {result.keptEarlier && <p className="caption">Your earlier try scored higher, so that one counts.</p>}
               <div className="feedback__actions">
                 <PixelButton onClick={closeHotspot}>Continue</PixelButton>
@@ -369,22 +334,41 @@ export default function ScenarioRunner({ scenario: sc, content }) {
               </div>
             </div>
           ) : (
-            <Primitive key={done[open.id]?.attempts || 0} config={open.configFor ? open.configFor(done) : open.config} onComplete={finishHotspot} />
+            <Primitive key={done[open.id]?.attempts || 0} config={open.configFor ? open.configFor(done, flags) : open.config} onComplete={finishHotspot} />
           )}
         </Dialog>
       )}
 
-      {ruleOpen && sc.ruleCard && <RuleCard rule={sc.ruleCard} onClose={() => setRuleOpen(false)} />}
+      {sc.Baseline && (run.phase === 'baseline' || baselineOpen) && (
+        <Dialog labelledBy="baseline-title" className="hdialog hdialog--wide" onClose={run.phase === 'baseline' ? undefined : () => setBaselineOpen(false)}>
+          <div className="kcard__eyebrow">
+            <span className="label">Baseline map · observed</span>
+          </div>
+          <h2 id="baseline-title" className="hdialog__prompt">
+            {sc.baselineTitle}
+          </h2>
+          <sc.Baseline flags={flags} />
+          <p className="caption">The starting condition, not a prediction. About 1 km across.</p>
+          <PixelButton
+            onClick={() => {
+              setBaselineOpen(false);
+              if (run.phase === 'baseline') setPhase('explore');
+            }}
+          >
+            {run.phase === 'baseline' ? 'Look around' : 'Back to the scene'}
+          </PixelButton>
+        </Dialog>
+      )}
 
       {run.phase === 'consequence' && sc.Finale && !finaleSeen && (
         <Dialog labelledBy="finale-title" className="hdialog hdialog--wide">
           <div className="kcard__eyebrow">
-            <span className="label">Five years, replayed</span>
+            <span className="label">Five-year outlook</span>
           </div>
           <h2 id="finale-title" className="hdialog__prompt">
-            The whole recovery, together
+            {sc.finaleTitle || 'The next five years'}
           </h2>
-          <sc.Finale done={done} />
+          <sc.Finale done={done} flags={flags} />
           <PixelButton onClick={() => setFinaleSeen(true)}>Continue</PixelButton>
         </Dialog>
       )}

@@ -4654,3 +4654,72 @@ button.path__node:active {
 @media (prefers-reduced-motion: reduce) {
   .stage .scenery, .stage.is-zoomed .scenery { transition: none; }
 }
+
+/* ---------- Map: intro line + card album ---------- */
+.sidebar__intro { margin-bottom: -2px; }
+.album-btn { margin: 0; font-size: 16px; padding: 10px 14px; }
+
+/* ---------- Farm: burned ridge + strip ---------- */
+.fs-burn rect { fill: color-mix(in srgb, var(--soil) 60%, var(--ink)); }
+.fs-burn .fs-burn__ash { fill: color-mix(in srgb, var(--faint) 50%, var(--ink)); }
+.fs-strip rect { fill: color-mix(in srgb, var(--veg) 70%, var(--ink)); stroke: var(--ink); stroke-width: 2; }
+.fs-strip .fs-strip__tree { fill: color-mix(in srgb, var(--veg) 45%, var(--ink)); }
+.fs-channel { fill: color-mix(in srgb, var(--faint) 60%, var(--bg)); stroke: var(--ink); stroke-width: 3; }
+
+/* Strip target, layer maps, source cards */
+.strip-target {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px;
+  background: color-mix(in srgb, var(--soil) 25%, var(--bg));
+  border: 3px dashed var(--ink);
+  border-radius: var(--radius);
+  text-align: left;
+  cursor: pointer;
+}
+.strip-target.is-target { border-color: var(--accent); background: var(--select); }
+.strip-target.is-planted { background: color-mix(in srgb, var(--veg) 30%, var(--bg)); border-style: solid; }
+.strip-target.is-channel { background: color-mix(in srgb, var(--faint) 35%, var(--bg)); border-style: solid; }
+.strip-target__what { font-size: 14px; }
+.hdialog:has(.layermap) { width: min(1100px, 100%); }
+.layermap { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; }
+.layermap__side { display: flex; flex-direction: column; gap: 10px; }
+.layermap__legend { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 12px; }
+.layermap__legend li { display: flex; align-items: center; gap: 6px; }
+.layermap__swatch { width: 14px; height: 14px; border: 1.5px solid var(--ink); flex: none; }
+.source-card__title { font-family: var(--font-pixel); font-weight: 700; }
+
+/* Baseline chloride readings (Scenario 4) */
+.chloride-chart { padding: 10px 12px; border: 2px solid var(--ink); border-radius: var(--radius-sm); background: var(--bg); }
+.chloride-chart__bars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: end; height: 110px; margin: 8px 0 4px; }
+.chloride-chart__col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
+.chloride-chart__bar { width: 70%; background: var(--warning); border: 2px solid var(--ink); }
+.lk-result { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 2px solid var(--ink); border-radius: var(--radius-sm); background: var(--cream); }
+
+.foreman { font-size: 12px; font-style: italic; }
+.foreman .label { font-style: normal; margin-right: 4px; }
+
+.divelog { padding: 10px 12px; border: 2px solid var(--ink); border-radius: var(--radius-sm); background: var(--cream); display: flex; flex-direction: column; gap: 4px; }
+
+/* Scenario 5 town */
+.ts-hill { fill: color-mix(in srgb, var(--veg) 55%, var(--panel)); }
+.ts-tank.is-empty { fill: var(--select); }
+.ts-monwell { fill: var(--water); stroke: var(--ink); stroke-width: 3; }
+.ts-cluster { fill: var(--danger); opacity: 0.22; }
+.ts-sign { fill: var(--bg); stroke: var(--ink); stroke-width: 3; }
+.ts-sign__txt { font-family: var(--font-pixel); font-size: 13px; font-weight: 700; fill: var(--ink); }
+.ts-gate { fill: none; stroke: var(--ink); stroke-width: 4; stroke-dasharray: 6 6; }
+.ts-clinic { fill: var(--bg); }
+.ts-cross { fill: var(--danger); }
+.ts-station { fill: var(--select); stroke: var(--ink); stroke-width: 3; }
+.ts-board { fill: var(--wood); stroke: var(--ink); stroke-width: 3; }
+.ts-posted { fill: var(--tag); stroke: var(--ink); stroke-width: 2; }
+.ts-harbor { fill: color-mix(in srgb, var(--water) 55%, var(--faint)); }
+.ts-harbor.is-clear { fill: color-mix(in srgb, var(--water) 85%, #1d4c78); }
+.cases__streets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.cases__cards { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+
+.tests { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 12px; }
+.tests .is-over { color: var(--danger); font-weight: 700; }

@@ -25,18 +25,6 @@ export const NOTES = {
     source: 'Pacific Island Times · Isla Public Media',
     href: 'https://www.pacificislandtimes.com/post/guam-water-restoration-near-50',
   },
-  house: {
-    title: 'Saving water saves energy',
-    text: 'Electricity on Guam costs more than the US average — about 1.4 times as much for homes in 2025 — so pumping and treating water is expensive. During water emergencies, people can be told to stop non-essential uses like washing cars and pressure washing.',
-    source: 'US Department of Energy · Guam Homeland Security',
-    href: 'https://www.energy.gov/oe/guam',
-  },
-  hall: {
-    title: 'Who protects the aquifer',
-    text: "Guam EPA's Water Resources Management Program permits and inspects wells to protect the northern aquifer from pollution and overpumping. GWA tests its water and publishes a yearly water quality report under the federal Safe Drinking Water Act.",
-    source: 'Guam EPA · Guam Waterworks Authority',
-    href: 'https://epa.guam.gov/wrmp/',
-  },
 };
 
 // Household emergency water guideline shown in the Typhoon Water Kit (Guam Homeland Security / OCD).

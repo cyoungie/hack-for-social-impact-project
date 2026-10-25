@@ -4,13 +4,14 @@
   "location": "Countryside",
   "background": "/scenes/scene1.png",
   "persona": {
-    "name": "Jack",
+    "name": "Rosa",
     "sprite": "/sprites/persona1.png",
     "tint": "#C8965A"
   },
   "intro": [
-    "Oh, thank goodness you're here! My name is Jack, and I run a small farm just outside the main town. Last rainy season, a string of heavy storms rolled in right after I'd plowed. The rain ran straight down my rows and carried off the topsoil, and by the time the skies cleared, the best soil on my land was sitting at the bottom of the stream.",
-    "Since then, my crops just haven't taken. It's put me in a real bind, and I never want to be caught off guard like this again.",
-    "Will you help me rethink how I farm, so the next big storm doesn't wash everything away?"
+    "Oh, thank goodness you’re here! My name is Rosa, and I run a small farm just outside the main town.",
+    "Last rainy season, a string of heavy storms rolled in right after I’d plowed. The rain ran straight down my rows and carried off the topsoil, and by the time the skies cleared, the best soil on my land was sitting at the bottom of the stream.",
+    "Since then, my crops just haven’t taken. It’s put me in a real bind, and I never want to be caught off guard like this again.",
+    "Will you help me rethink how I farm, so the next big storm doesn’t wash everything away?"
   ]
 }

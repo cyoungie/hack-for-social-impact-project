@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useGame } from '../state/GameState.jsx';
 import { PROBLEMS } from '../data/game.js';
-import { isBuilt, lockedBy } from '../scenarios/index.js';
+import { isBuilt } from '../scenarios/index.js';
 import { Nav, Plate } from '../components/ui.jsx';
 import { Icon } from '../components/Icons.jsx';
 
@@ -18,11 +18,11 @@ const PLACEMENTS = {
 };
 
 // Sits beside the badge; flips left, then drops below, if it would spill out of the ocean viewport.
+// Shows the place, the resident's name and one line about their problem.
 function CueCard({ problem, solved, boundsRef }) {
   const ref = useRef(null);
   const [placement, setPlacement] = useState(problem.x > 55 ? 'left' : 'right');
   const style = PLACEMENTS[placement](problem);
-  const blocker = lockedBy(problem.id, solved);
 
   useLayoutEffect(() => {
     const card = ref.current?.getBoundingClientRect();
@@ -32,47 +32,19 @@ function CueCard({ problem, solved, boundsRef }) {
     if (overflows) setPlacement(placement === 'right' ? 'left' : 'below');
   }, [placement, boundsRef]);
 
-  let status = null;
-  if (blocker) status = `LOCKED — solve ${blocker.title.split(' · ')[0]} first`;
-
   return (
-    <div
-      className={`cue cue--${placement} ${status ? 'is-locked' : ''}`}
-      style={style}
-      ref={ref}
-      role="tooltip"
-      id={`cue-${problem.id}`}
-    >
+    <div className={`cue cue--${placement}`} style={style} ref={ref} role="tooltip" id={`cue-${problem.id}`}>
       <div className="cue__head">
-        <span className="cue__title">{problem.title}</span>
-        <Plate tone={status ? 'plain' : 'water'} style={status ? undefined : { background: problem.color }}>
-          {problem.tag}
+        <span className="cue__title">{problem.place}</span>
+        <Plate tone="water" style={{ background: problem.color }}>
+          {problem.resident}
         </Plate>
       </div>
-      {status ? (
-        <>
-          <p className="cue__body">{problem.line}</p>
-          <p className="cue__locked">
-          <Icon name="lock" size={16} />
-          {status}
-          </p>
-        </>
-      ) : (
-        <>
-          <p className="cue__body">{problem.body ?? problem.line}</p>
-          <div className="cue__foot">
-            <span className="cue__difficulty">
-              <span className="label">Difficulty</span>
-              {[0, 1, 2].map((i) => (
-                <span key={i} className={`cue__dot ${i < problem.difficulty ? 'is-filled' : ''}`} />
-              ))}
-            </span>
-            <span className="cue__cta">
-              {solved.includes(problem.id) ? 'Solved · play again' : `Click to meet ${problem.persona.name}`}
-            </span>
-          </div>
-        </>
-      )}
+      <p className="cue__body">{problem.line}</p>
+      <div className="cue__foot">
+        <span className="caption">{problem.scenarioTitle}</span>
+        <span className="cue__cta">{solved.includes(problem.id) ? 'Solved · play again' : `Click to meet ${problem.resident}`}</span>
+      </div>
     </div>
   );
 }
@@ -141,7 +113,7 @@ function usePanZoom(viewRef) {
 }
 
 export default function ProblemMap() {
-  const { state, openIntro } = useGame();
+  const { state, openIntro, goTo } = useGame();
   const [active, setActive] = useState(null);
   const [imgOk, setImgOk] = useState(true);
   const oceanRef = useRef(null);
@@ -149,9 +121,8 @@ export default function ProblemMap() {
   const { view, pointerHandlers, zoomIn, zoomOut, reset } = usePanZoom(viewRef);
   const solved = state.solvedProblems;
   const activeProblem = PROBLEMS.find((p) => p.id === active);
-  const builtCount = PROBLEMS.filter((p) => isBuilt(p.id)).length;
 
-  const playable = (p) => !lockedBy(p.id, solved);
+  const playable = (p) => isBuilt(p.id);
   const enter = (p) => {
     if (playable(p)) openIntro(p.id);
   };
@@ -240,8 +211,8 @@ export default function ProblemMap() {
         </section>
 
         <aside className="sidebar">
-          <h1 tabIndex={-1}>Five places need you.</h1>
-          <p className="caption">Hover a block to preview. Click to meet who lives there.</p>
+          <p className="lede sidebar__intro">You’re spending the summer on the island. People here could use a hand.</p>
+          <h1 tabIndex={-1}>Pick a place to start.</h1>
           <p className="solved-count">{solved.length} / 5 Solved</p>
 
           <ul className={`rows ${active ? 'has-active' : ''}`}>
@@ -257,7 +228,9 @@ export default function ProblemMap() {
                     )}
                   </span>
                   <span className="row__text">
-                    <span className="row__title">{p.title}</span>
+                    <span className="row__title">
+                      {p.place} · {p.resident}
+                    </span>
                     <span className="row__line">{p.line}</span>
                   </span>
                   <Icon name={playable(p) ? 'chevron' : 'lock'} size={18} className="row__chev" />
@@ -278,10 +251,11 @@ export default function ProblemMap() {
             })}
           </ul>
 
-          <p className="sidebar__foot">
-            {builtCount} of 5 places are fully playable so far. Solve all five to unlock your island proposal — a real one-pager
-            you can bring to a real meeting.
-          </p>
+          <div className="sidebar__foot">
+            <button type="button" className="pbtn pbtn--ghost pbtn--block album-btn" onClick={() => goTo('profile')}>
+              Card album · {solved.length} / 5
+            </button>
+          </div>
         </aside>
       </main>
     </div>

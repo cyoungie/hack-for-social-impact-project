@@ -1,38 +1,57 @@
 import { Mark } from './stageKit.jsx';
 import FarmScene from './scenes/FarmScene.jsx';
+import FarmMap from './farm/FarmMap.jsx';
+import FarmOutlook from './farm/FarmOutlook.jsx';
+import { LayerMap, COVER, COVER_NOTE } from '../components/LayerMap.jsx';
+
+// NRCS practice standards are published in the Field Office Technical Guide (nrcs.usda.gov itself would not load when checked).
+const NRCS_FOTG = 'https://efotg.sc.egov.usda.gov/';
 
 const TILL = {
   right:
-    'Nice work. Tilling less disturbs less soil, so more of its structure, organic matter, and soil life stays intact. Following the contour lines means each furrow catches water instead of channeling it downhill. NRCS promotes both reduced tillage and contour farming to cut erosion on sloped land.',
+    'Nice work. Tilling less disturbs less soil, so more of its structure, organic matter and soil life stays intact. Following the contour lines means each furrow catches water instead of channelling it downhill. NRCS promotes both reduced tillage and contour farming to cut erosion on sloped land.',
   badDepth:
     'Not quite. The path is good, but deep tilling breaks up soil structure and leaves loose soil that heavy rain can easily carry away. NRCS recommends tilling as little as possible, or skipping tillage entirely where the crop allows.',
   badPath:
     'Not quite. The depth is good, but furrows running downhill act like gutters, speeding up runoff toward the stream. NRCS recommends tilling along the contour so each row slows the water down.',
-  // Both wrong: the depth point and the path point, combined into one message.
+  // Both wrong: both points in one message.
   both:
     'Not quite. Deep tilling breaks up soil structure and leaves loose soil that heavy rain can easily carry away, and furrows running downhill act like gutters, speeding up runoff toward the stream. NRCS recommends tilling as little as possible, or skipping tillage entirely where the crop allows, and tilling along the contour so each row slows the water down.',
 };
 
-// Scenario #1 (Help a Business Owner): Heavy Soil Erosion
+function Baseline() {
+  return (
+    <LayerMap
+      layers={[
+        { id: 'landcover', label: 'Land cover', note: `Cropland, savanna, burned ground on the ridge, riverbank trees. ${COVER_NOTE}` },
+        { id: 'slope', label: 'Slope', note: 'The field is moderate; the ridge above it is steep.' },
+        { id: 'gully', label: 'Last wet season', note: 'The gully the storms cut across the field.' },
+      ]}
+      legend={[
+        { color: COVER.crop, label: 'Cropland' },
+        { color: COVER.grass, label: 'Savanna' },
+        { color: COVER.bare, label: 'Burned ground' },
+        { color: COVER.trees, label: 'Riverbank trees' },
+        { color: COVER.water, label: 'Stream' },
+      ]}
+      render={(on) => <FarmMap layers={on} label="Baseline map of Rosa's farm" />}
+    />
+  );
+}
+
+// Scenario 1 (Help a Business Owner): Heavy Soil Erosion
 export default {
   id: 'field',
-  plate: 'HEAVY SOIL EROSION · COUNTRYSIDE · 1 OF 5',
-  persona: { name: 'Jack', role: 'Runs a small farm outside the main town' },
-  closing:
-    "Cover the field between plantings, till less and along the contour, and check the forecast before fertilizing. That's how I farm from now on.",
+  plate: 'COUNTRYSIDE · HEAVY SOIL EROSION',
+  persona: { name: 'Rosa', role: 'Runs a small farm outside the main town' },
+  closing: 'If the soil stays, so do I. Thanks for the help.',
 
-  blocks: [
-    { tone: 'sky', x: 0, y: 0, w: 100, h: 26 },
-    { tone: 'land', x: 0, y: 26, w: 100, h: 74 },
-    { tone: 'house', x: 3, y: 32, w: 15, h: 22, label: 'Farm shed' },
-    { id: 'field', tone: 'field-tilled', x: 22, y: 32, w: 46, h: 50, label: 'Sweet potato field' },
-    { id: 'stream', tone: 'stream', x: 72, y: 26, w: 6, h: 58, label: 'Stream' },
-    { tone: 'sea', x: 70, y: 84, w: 30, h: 16, label: 'Bay' },
-    { id: 'reef', tone: 'reef-live', x: 84, y: 88, w: 13, h: 9 },
-  ],
+  Baseline,
+  baselineTitle: 'The farm and the hill above it',
+  Finale: FarmOutlook,
+  finaleTitle: 'Rosa’s farm, the next five years',
 
-  // Illustrated scene. The field, stream, and reef change as soon as each choice is made;
-  // `outcome` is set once the consequence frame plays.
+  // Illustrated scene. The field, ridge strip, stream and reef change as soon as each choice is made.
   Scene: FarmScene,
   sceneState(done, outcome) {
     const cover = done.cover?.state;
@@ -48,7 +67,8 @@ export default {
     return {
       field,
       crops,
-      muddy: outcome ? outcome === 'bad' : Boolean(till && !tillOk),
+      strip: done.ridge?.state || null,
+      muddy: outcome ? outcome === 'bad' : Boolean(till && !tillOk) || done.ridge?.state === 'channel',
       reefGrey: outcome ? outcome === 'bad' : Boolean(fert && !fert.fertGood),
       plume: Boolean(fert && !fert.fertGood) || outcome === 'bad',
     };
@@ -57,14 +77,15 @@ export default {
   hotspots: [
     {
       id: 'cover',
-      label: 'The field',
+      label: '1.1 · The field',
       icon: 'grass',
       x: 45,
       y: 57,
       box: { x: 22.2, y: 39.5, w: 47.2, h: 46 },
       kind: 'choice',
-      prompt:
-        'Many tropical islands time their crop rotations around the wet and dry seasons. Help Jack choose how to manage the field between plantings:',
+      prompt: 'Many tropical islands time their crop rotations around the wet and dry seasons. Help Rosa choose how to manage the field between plantings.',
+      say: { correct: 'I can get that down before the rains start.', wrong: 'That’s how the field looked before the last storm.' },
+      source: { source: 'USDA NRCS', text: 'NRCS recommends keeping soil covered between crops, with mulch or cover crops.', href: NRCS_FOTG },
       config: {
         options: [
           {
@@ -73,14 +94,14 @@ export default {
             label: 'Cover the field with mulch',
             points: { soil: 5, water: 2 },
             feedback:
-              "Good call. Mulch acts like a shield, taking the impact of heavy rain so it doesn't break up and carry off the topsoil. The USDA Natural Resources Conservation Service (NRCS) recommends keeping soil covered between crops for exactly this reason.",
+              'Good call. Mulch acts like a shield, taking the impact of heavy rain so it doesn’t break up and carry off the topsoil. The USDA Natural Resources Conservation Service (NRCS) recommends keeping soil covered between crops for exactly this reason.',
           },
           {
             id: 'bare',
             label: 'Leave the field bare',
             points: { soil: -3 },
             feedback:
-              'Bare soil is the riskiest option here. In a tropical downpour, unprotected topsoil can wash away in a single storm, taking nutrients with it. The USDA Natural Resources Conservation Service (NRCS) recommends covering fields with mulch or cover crops between plantings.',
+              'Bare soil is the riskiest option here. In a tropical downpour, unprotected topsoil can wash away in a single storm, taking nutrients with it. NRCS recommends covering fields with mulch or cover crops between plantings.',
           },
           {
             id: 'cover',
@@ -88,21 +109,27 @@ export default {
             label: 'Seed the field with cover crops',
             points: { soil: 5, veg: 3 },
             feedback:
-              'Good call. Cover crops protect the surface, and their roots hold soil in place. Some, like legumes, even add nitrogen for the next crop. The USDA Natural Resources Conservation Service (NRCS) recommends keeping soil covered between crops for exactly this reason.',
+              'Good call. Cover crops protect the surface, and their roots hold soil in place. Some, like legumes, even add nitrogen for the next crop. NRCS recommends keeping soil covered between crops for exactly this reason.',
           },
         ],
       },
     },
     {
       id: 'tractor',
-      label: 'Tractor',
+      label: '1.2 · Tractor',
       icon: 'tractor',
       x: 11,
       y: 70,
       box: { x: 6.4, y: 58, w: 14.4, h: 23 },
       labelBelow: true,
       kind: 'till',
-      prompt: "Jack needs to prepare the field for the next planting. Set the tiller's depth, then drive the tractor across the field to till it.",
+      prompt: 'Rosa needs to prepare the field for the next planting. Set the tiller’s depth, then drive the tractor across the field to till it.',
+      say: {
+        correct: 'Contour rows take me longer to drive. If they keep the soil, it’s worth it.',
+        ok: 'Half of that I can fix next time.',
+        wrong: 'That’s how I plowed it last year.',
+      },
+      source: { source: 'USDA NRCS', text: 'NRCS promotes reduced tillage and contour farming to cut erosion on sloped land.', href: NRCS_FOTG },
       config: {
         startDepth: 2,
         depths: [
@@ -120,14 +147,18 @@ export default {
     },
     {
       id: 'clouds',
-      label: 'The clouds',
+      label: '1.3 · The clouds',
       icon: 'rain',
       x: 50,
-      y: 14,
-      box: { x: 38.6, y: 3.6, w: 22.2, h: 23 },
+      y: 12,
+      box: { x: 38.6, y: 3.6, w: 22.2, h: 18 },
       kind: 'fertilizer',
       prompt:
-        'The rainy season is starting, and Jack needs to fertilize the young crops this week. Check the forecast and pick the best day to apply fertilizer.',
+        'The rainy season is starting, and Rosa needs to fertilize the young crops this week. Check the forecast and pick the best day to apply fertilizer.',
+      say: { correct: 'I’ll wait for the dry day, then.', ok: 'The fertilizer part I got right, at least.', wrong: 'So that’s where my fertilizer went last year.' },
+      source: { source: 'USDA NRCS', text: 'NRCS nutrient management guidance: check the forecast and avoid applying fertilizer before heavy rain.', href: NRCS_FOTG },
+      // Fertilizing on the storm day or the day before sends runoff toward the reef.
+      flags: (r) => ({ farm_runoff: !r.state.fertGood }),
       config: {
         days: [
           { id: 'mon', label: 'Mon', icon: 'sunny', wx: 'Sunny', rain: 0, rainLabel: '0 in' },
@@ -153,6 +184,54 @@ export default {
           'The storm will water the field for free. Watering on top of heavy rain just adds runoff. Save the irrigation for the drier days.',
       },
     },
+    {
+      id: 'ridge',
+      label: '1.4 · The ridge',
+      icon: 'mountain',
+      x: 45,
+      y: 28,
+      box: { x: 20.8, y: 23, w: 49, h: 15 },
+      kind: 'strip',
+      prompt:
+        'The hill above Rosa’s farm is burned every dry season to clear brush for hunting. Rosa can’t control that land. Help her decide what to put at the top of her own field to catch what comes down.',
+      say: { correct: 'I can plant that this weekend with my cousins.', wrong: 'Then I’m at the mercy of whoever burns that hill.' },
+      config: {
+        target: 'The strip above the field',
+        options: [
+          {
+            id: 'planted',
+            correct: true,
+            label: 'Row of native grass and trees',
+            points: { soil: 5, veg: 3 },
+            setFlags: { ridge_strip: true },
+            feedback:
+              'Good call. A planted strip slows runoff and traps soil before it reaches the crop, and its roots hold the edge of the field together. NRCS calls these vegetative barriers or filter strips.',
+            source: { source: 'USDA NRCS', text: 'NRCS documents vegetative barriers and filter strips for slowing runoff and trapping soil.', href: NRCS_FOTG },
+          },
+          {
+            id: 'channel',
+            label: 'Concrete channel',
+            points: { soil: -1, water: -3 },
+            setFlags: { ridge_strip: false },
+            feedback: 'That moves the water faster, straight to the stream, and the soil goes with it. It protects this field by sending the problem downhill.',
+            source: { source: 'USDA NRCS', text: 'NRCS documents vegetative barriers and filter strips for slowing runoff and trapping soil.', href: NRCS_FOTG },
+          },
+          {
+            id: 'nothing',
+            label: 'Nothing',
+            points: { soil: -3 },
+            setFlags: { ridge_strip: false },
+            feedback:
+              'Then the ridge decides what happens to the field. On islands like this, repeat burning leaves bare ground that sends water and soil straight down (US National Park Service).',
+            source: {
+              source: 'US National Park Service',
+              text: 'On Guam, land becomes bare when wildfires are set for hunting, and clearing and burning vegetation lets more sediment wash into the ocean and onto coral reefs.',
+              href: 'https://www.nps.gov/wapa/learn/nature/coral-threats.htm',
+            },
+          },
+        ],
+      },
+    },
   ],
 
   overlays(done) {
@@ -173,7 +252,7 @@ export default {
         )}
         {done.clouds &&
           (done.clouds.state.fertGood ? (
-            <Mark x={40} y={30} icon="grass" tone="veg">
+            <Mark x={70} y={44} icon="grass" tone="veg">
               Crops green — nutrients in the soil
             </Mark>
           ) : (
@@ -189,7 +268,7 @@ export default {
   consequence: {
     good: {
       headline: 'The topsoil stayed on the hill.',
-      swap: { stream: 'stream' },
+      swap: {},
       marks: [
         { x: 30, y: 36, icon: 'grass', tone: 'veg', text: 'Sweet potatoes taking root' },
         { x: 62, y: 20, icon: 'stream', tone: 'veg', text: 'Stream running clear' },
@@ -198,7 +277,7 @@ export default {
     },
     bad: {
       headline: 'Another storm, another layer gone.',
-      swap: { field: 'field-furrows', stream: 'stream-muddy' },
+      swap: {},
       marks: [
         { x: 30, y: 36, icon: 'grass', tone: 'danger', text: 'Gullies down the rows' },
         { x: 62, y: 20, icon: 'stream', tone: 'danger', text: 'Stream running brown' },

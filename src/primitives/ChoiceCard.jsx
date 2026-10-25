@@ -31,6 +31,8 @@ export default function ChoiceCard({ config, onComplete }) {
             feedback: option.feedback,
             verdict: option.correct ? 'correct' : option.ok ? 'ok' : 'wrong',
             state: option.id,
+            setFlags: option.setFlags,
+            source: option.source,
             compare: (() => {
               const alt = alternative(option);
               return alt && compareWith(alt.label, alt.points, alt.feedback);

@@ -29,7 +29,7 @@ const pts = (line) => line.map((p) => p.join(',')).join(' ');
 const mix = (a, b, t) => `color-mix(in srgb, ${a} ${Math.round(t * 100)}%, ${b})`;
 
 // route: id or null; controls: Set; frame (optional): { mud, reef, bare, year }; drain: 'basin'|null
-export default function ReefMap({ route, controls = new Set(), frame, drain, showRoutes = false, className = '', label }) {
+export default function ReefMap({ route, controls = new Set(), frame, drain, showRoutes = false, firstCut = false, layers = { landcover: true }, className = '', label }) {
   const mud = frame?.mud ?? 0.4;
   const reef = frame?.reef ?? 0.6;
   const bay = mud < 0.3 ? 'var(--water)' : mud < 0.6 ? mix('var(--water)', 'var(--soil)', 0.5) : mix('var(--soil)', 'var(--wood)', 0.8);
@@ -64,6 +64,14 @@ export default function ReefMap({ route, controls = new Set(), frame, drain, sho
           <polyline points={pts(ROUTE_LINES[route])} className="rm-road" />
           {route === 'ridge' && <rect x="270" y="30" width="80" height="170" className="rm-cleared" />}
         </>
+      )}
+      {firstCut && !route && <polyline points="230,210 190,152" className="rm-cut" />}
+      {firstCut && !route && <text x="196" y="190" className="vm-label">FIRST 200 M OF ROAD CUT</text>}
+      {layers.slope && (
+        <g className="vm-slope">
+          <text x="120" y="60">STEEP · UPPER SLOPE</text>
+          <text x="20" y="196">GENTLE · VILLAGE</text>
+        </g>
       )}
       {controls.has('fences') && route && <polyline points="60,224 380,224" className="rm-fence" />}
       {controls.has('pond') && route && <rect x="150" y="214" width="70" height="14" className="rm-pond" />}

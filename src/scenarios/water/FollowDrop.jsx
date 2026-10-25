@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { PixelButton, SquareRadio } from '../../components/ui.jsx';
-import { addPoints } from '../../data/scoring.js';
 
 // Follow the Drop: pick a treatment, flush, and watch how fast wastewater reaches the lens.
 export const TREATMENTS = [
-  { id: 'leave', label: 'Leave the old septic tank', speed: 'fast', path: 'down' },
-  { id: 'pump', label: 'Pump and inspect it', speed: 'slower', path: 'down' },
-  { id: 'upgrade', label: 'Upgrade it', speed: 'slowest', path: 'down' },
-  { id: 'sewer', label: 'Connect to the sewer when offered', speed: 'none', path: 'sewer' },
+  { id: 'leave', label: 'Leave the old tank', speed: 'fast', path: 'down' },
+  { id: 'pump', label: 'Have it pumped and inspected', speed: 'slower', path: 'down' },
+  { id: 'upgrade', label: 'Replace it with an upgraded system', speed: 'slowest', path: 'down' },
+  { id: 'sewer', label: 'Connect to the sewer, now available on Ana’s street', speed: 'none', path: 'sewer' },
 ];
 const DURATION = { fast: 1400, slower: 2600, slowest: 3600, none: 2200 };
 const reducedMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
@@ -51,8 +50,7 @@ function HomeCutaway({ treatment, flushing }) {
 
 export default function FollowDrop({ config, onComplete }) {
   const [choice, setChoice] = useState('');
-  const [step, setStep] = useState('pick'); // pick | flushing | bonus
-  const [reported, setReported] = useState(false);
+  const [step, setStep] = useState('pick'); // pick | flushing | arrived
   const resultRef = useRef(null);
 
   const flush = () => {
@@ -63,7 +61,7 @@ export default function FollowDrop({ config, onComplete }) {
   useEffect(() => {
     if (step !== 'flushing') return undefined;
     const t = TREATMENTS.find((x) => x.id === choice);
-    const timer = setTimeout(() => setStep('bonus'), reducedMotion() ? 0 : DURATION[t.speed] + 400);
+    const timer = setTimeout(() => setStep('arrived'), reducedMotion() ? 0 : DURATION[t.speed] + 400);
     return () => clearTimeout(timer);
   }, [step, choice]);
 
@@ -71,10 +69,8 @@ export default function FollowDrop({ config, onComplete }) {
     const r = resultRef.current;
     onComplete({
       ...r,
-      points: reported ? addPoints(r.points, config.reportPoints) : r.points,
-      feedback: `${r.feedback}${reported ? ` ${config.reportFeedback}` : ''}`,
       verdict: choice === 'sewer' ? 'correct' : choice === 'leave' ? 'wrong' : 'ok',
-      state: { treatment: choice, reported },
+      state: { treatment: choice },
     });
   };
 
@@ -89,8 +85,8 @@ export default function FollowDrop({ config, onComplete }) {
               {t.speed === 'none'
                 ? 'The drop goes into the sewer line, away from the lens.'
                 : t.speed === 'fast'
-                  ? 'The drop reaches the lens fast.'
-                  : 'The drop takes longer to reach the lens.'}
+                  ? 'The drop reaches the lens fast, and dirty.'
+                  : 'The drop takes longer to reach the lens, and arrives cleaner.'}
             </p>
           )}
         </div>
@@ -105,15 +101,6 @@ export default function FollowDrop({ config, onComplete }) {
               ))}
             </div>
           </fieldset>
-          {step === 'bonus' && (
-            <div className="drop-bonus">
-              <p className="label">Bonus · a sewage smell on the map</p>
-              <p className="caption">Someone down the street smells sewage near a manhole.</p>
-              <button type="button" className={`timechip ${reported ? 'is-on' : ''}`} disabled={reported} onClick={() => setReported(true)}>
-                {reported ? 'Reported to GWA' : 'Report to GWA'}
-              </button>
-            </div>
-          )}
         </div>
       </div>
       {step === 'pick' && (
@@ -121,7 +108,7 @@ export default function FollowDrop({ config, onComplete }) {
           Flush
         </PixelButton>
       )}
-      {step === 'bonus' && (
+      {step === 'arrived' && (
         <PixelButton className="pbtn--block" onClick={finish}>
           Done
         </PixelButton>

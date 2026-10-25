@@ -1,6 +1,6 @@
 {
   "id": 3,
-  "title": "Coral & Sea Life",
+  "title": "The Road and the Reef",
   "location": "Coast",
   "background": "/scenes/scene3.png",
   "persona": {
@@ -9,8 +9,9 @@
     "tint": "#4CC269"
   },
   "intro": [
-    "You visiting? Then you'll want to see the reef before it's gone. I'm Tom, a fisherman here.",
-    "Last year the water got too warm and the coral went white and the fish started dying. It was recovering, but then they started building the road up the hill and now every rain turns the bay brown.",
-    "Help us figure out how to construct the road with minimal impact on sea life."
+    "You here for the diving? You picked a bad year. I’m Tom, I fish this bay.",
+    "The water got too warm last summer and a lot of the coral went white, and the catch dropped off. It was starting to come back, and then they started cutting the new road up the hill. Now every time it rains the bay turns brown.",
+    "The contractor’s foreman said he’d hear me out before they start the next section.",
+    "I’m not against the road. I just want them to build it so the bay survives."
   ]
 }

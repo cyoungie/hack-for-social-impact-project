@@ -28,13 +28,13 @@ export default function LeakHunt({ config, onComplete }) {
   const finish = () => {
     const { found: f, reported: r } = stateRef.current;
     const n = f.length;
-    const tier = n >= 4 ? config.tiers.most : n >= 2 ? config.tiers.some : config.tiers.few;
-    const voice = n >= 4 && r.length >= 4 ? config.voice : {};
+    // Tiers: 4–5 found and reported; found but not reported; 2–3; 0–1.
+    const key = n >= 4 && r.length >= 4 ? 'most' : n > r.length ? 'unreported' : n >= 2 ? 'some' : 'few';
+    const tier = config.tiers[key];
     onComplete({
       ...tier,
-      points: { ...tier.points, people: (tier.points.people || 0) + (voice.people || 0) },
-      feedback: `You found ${n} of ${LEAKS.length} leaks and reported ${r.length} to GWA. ${n > r.length ? 'Leaks you found but did not report keep running. ' : ''}${tier.feedback}`,
-      verdict: n >= 4 && r.length >= 4 ? 'correct' : n >= 2 ? 'ok' : 'wrong',
+      feedback: `You found ${n} of ${LEAKS.length} leaks and reported ${r.length}. ${tier.feedback}`,
+      verdict: key === 'most' ? 'correct' : key === 'some' ? 'ok' : 'wrong',
       state: { found: n, reported: r.length },
     });
   };
