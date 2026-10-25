@@ -8,11 +8,8 @@ import { Avatar } from '../components/Avatar.jsx';
 import { Icon } from '../components/Icons.jsx';
 import { Dialog } from '../components/Dialog.jsx';
 import { PointChips } from '../components/PointChips.jsx';
+import { WaterNote } from '../components/WaterNote.jsx';
 import ChoiceCard from '../primitives/ChoiceCard.jsx';
-import PumpDial from '../primitives/PumpDial.jsx';
-import ForecastStrip from '../primitives/ForecastStrip.jsx';
-import TimedGrab from '../primitives/TimedGrab.jsx';
-import ComposeStatement from '../primitives/ComposeStatement.jsx';
 import TillerPlan from '../primitives/TillerPlan.jsx';
 import FertilizerPlan from '../primitives/FertilizerPlan.jsx';
 import RiskMap from '../scenarios/typhoon/RiskMap.jsx';
@@ -20,14 +17,17 @@ import RepairFund from '../scenarios/typhoon/RepairFund.jsx';
 import MeetingVote from '../scenarios/typhoon/MeetingVote.jsx';
 import CoralCount from '../scenarios/reef/CoralCount.jsx';
 import RoadPlan from '../scenarios/reef/RoadPlan.jsx';
+import LensKeeper from '../scenarios/water/LensKeeper.jsx';
+import LeakHunt from '../scenarios/water/LeakHunt.jsx';
+import FollowDrop from '../scenarios/water/FollowDrop.jsx';
+import WaterKit from '../scenarios/water/WaterKit.jsx';
+import WaterDetective from '../scenarios/water/WaterDetective.jsx';
+import VillageCouncil from '../scenarios/water/VillageCouncil.jsx';
+import TownAction from '../scenarios/town/TownAction.jsx';
 import KnowledgeCard from './KnowledgeCard.jsx';
 
 const PRIMITIVES = {
   choice: ChoiceCard,
-  pump: PumpDial,
-  forecast: ForecastStrip,
-  grab: TimedGrab,
-  compose: ComposeStatement,
   till: TillerPlan,
   fertilizer: FertilizerPlan,
   riskmap: RiskMap,
@@ -35,6 +35,13 @@ const PRIMITIVES = {
   meeting: MeetingVote,
   coralcount: CoralCount,
   roadplan: RoadPlan,
+  lenskeeper: LensKeeper,
+  leakhunt: LeakHunt,
+  followdrop: FollowDrop,
+  waterkit: WaterKit,
+  detective: WaterDetective,
+  council: VillageCouncil,
+  town: TownAction,
 };
 
 const VERDICT = { correct: 'Good call', ok: 'Partly there', wrong: 'Not quite' };
@@ -137,10 +144,16 @@ export default function ScenarioRunner({ scenario: sc, content }) {
     timer.current = setTimeout(() => setOpenId(h.id), reducedMotion() ? 0 : 380);
   };
 
+  // Mini-games can be retried (sc.retries times); the best score is the one kept.
+  const scoreOf = (r) => Object.values(r.points || {}).reduce((a, b) => a + b, 0);
   const finishHotspot = (r) => {
-    completeHotspot(open.id, r);
-    setResult(r);
+    const prev = done[open.id];
+    const attempts = (prev?.attempts || 0) + 1;
+    const kept = prev && scoreOf(prev) > scoreOf(r) ? prev : r;
+    completeHotspot(open.id, { ...kept, attempts });
+    setResult({ ...r, attempts, keptEarlier: kept === prev });
   };
+  const canRetry = result && sc.retries && result.attempts <= sc.retries;
 
   const closeHotspot = () => {
     if (result) {
@@ -155,7 +168,11 @@ export default function ScenarioRunner({ scenario: sc, content }) {
       <Nav plate={sc.plate} />
       <main className="scenario">
         <div className="scenario__main">
-          <section className="stage" aria-label="Scene">
+          <section
+            className={`stage ${open?.zoom ? 'is-zoomed' : ''}`}
+            aria-label="Scene"
+            style={open?.zoom && open.box ? { '--zoom-x': `${open.box.x + open.box.w / 2}%`, '--zoom-y': `${open.box.y + open.box.h / 2}%` } : undefined}
+          >
             {sc.Scene ? (
               <div className="scenery" aria-hidden="true">
                 <sc.Scene {...sc.sceneState(done, showOutcome ? outcome : null)} />
@@ -169,6 +186,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
             )}
             {/* Per-choice labels; the consequence frame shows its own. */}
             {!showOutcome && <div className="stage__overlays">{sc.overlays(done)}</div>}
+            {sc.Hud && <sc.Hud done={done} />}
 
             {!showOutcome &&
               sc.hotspots.map((h) =>
@@ -273,6 +291,8 @@ export default function ScenarioRunner({ scenario: sc, content }) {
             </div>
           </PixelCard>
 
+          {sc.Rail && <sc.Rail done={done} />}
+
           {sc.ruleCard && (
             <button type="button" className="pbtn pbtn--ghost pbtn--block rule-btn" onClick={() => setRuleOpen(true)}>
               Open the rule
@@ -310,6 +330,11 @@ export default function ScenarioRunner({ scenario: sc, content }) {
           {result ? (
             <div className={`feedback is-${result.verdict}`}>
               <p className="label">{VERDICT[result.verdict]}</p>
+              {(result.say || open.say?.[result.verdict]) && (
+                <p className="feedback__say">
+                  <span className="label">{persona.name}</span> “{result.say || open.say[result.verdict]}”
+                </p>
+              )}
               <p>{result.feedback}</p>
               <PointChips points={result.points} emptyText="No change to the bars." />
               {result.links && (
@@ -332,10 +357,19 @@ export default function ScenarioRunner({ scenario: sc, content }) {
                   <p className="compare__note">{result.compare.note}</p>
                 </div>
               )}
-              <PixelButton onClick={closeHotspot}>Continue</PixelButton>
+              {(result.note || open.note) && <WaterNote note={result.note || open.note} />}
+              {result.keptEarlier && <p className="caption">Your earlier try scored higher, so that one counts.</p>}
+              <div className="feedback__actions">
+                <PixelButton onClick={closeHotspot}>Continue</PixelButton>
+                {canRetry && (
+                  <button type="button" className="pbtn pbtn--ghost" onClick={() => setResult(null)}>
+                    Try again (once)
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
-            <Primitive config={open.configFor ? open.configFor(done) : open.config} onComplete={finishHotspot} />
+            <Primitive key={done[open.id]?.attempts || 0} config={open.configFor ? open.configFor(done) : open.config} onComplete={finishHotspot} />
           )}
         </Dialog>
       )}

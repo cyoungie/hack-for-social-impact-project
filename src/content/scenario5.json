@@ -3,10 +3,14 @@
   "title": "Land Development",
   "location": "Industry & Military",
   "background": "/scenes/scene5.png",
-  "persona": { "name": "Marcus", "sprite": "/sprites/persona5.png", "tint": "#E8B55C" },
+  "persona": {
+    "name": "Marcus",
+    "sprite": "/sprites/persona5.png",
+    "tint": "#E8B55C"
+  },
   "intro": [
-    "Hey — you're the planner, right? Is your water tasting and looking funny too?",
-    "Ours has been off for two weeks, right since they started clearing that parcel uphill.",
-    "My uncle says there's nothing a town can do when the project's this big. I think he's wrong, but I don't actually know what the moves are. Do you?"
+    "Hey, {playerName}! How are you doing? Is your water tasting and looking funny, too?",
+    "I’ve been noticing ever since I moved to this part of town, the water’s been blackened and polluted with soot and oil leakage.",
+    "Do you have any ideas of what I could do to make this safer for my family and our neighbors? What options do we have? Unfortunately there’s so much damage now I’m starting to think there’s no real solution except moving away from here!"
   ]
 }

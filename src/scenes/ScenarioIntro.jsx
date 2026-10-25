@@ -63,7 +63,7 @@ export default function ScenarioIntro() {
   const { state, beginScenario, inputMode } = useGame();
   const id = state.introId;
   const content = CONTENT[id];
-  const bubbles = content.intro;
+  const bubbles = content.intro.map((b) => b.replaceAll('{playerName}', state.playerName));
   const [idx, setIdx] = useState(0);
   const text = bubbles[idx];
   const instantRef = useRef(false);

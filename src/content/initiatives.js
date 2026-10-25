@@ -1,5 +1,6 @@
 // Real programs players can join or use, grouped by the map slot they connect to.
 // Every link was checked to load; descriptions stick to what each site offers.
+// GWA's own site isn't linked: it currently carries injected spam links.
 export const INITIATIVES = {
   field: [
     {
@@ -58,9 +59,9 @@ export const INITIATIVES = {
     },
     {
       org: 'Guam Waterworks Authority',
-      title: 'Report leaks and ask about sewer hookup',
-      body: 'The island water utility — report a leak on your street and ask whether sewer connection reaches your home.',
-      href: 'https://guamwaterworks.org/',
+      title: 'Report leaks and outages: 646-4211',
+      body: 'Call GWA to report a leak or outage on your street, and ask whether a sewer line reaches your home — GWA offers loans to help homeowners connect.',
+      href: 'https://www.postguam.com/news/local/gwa-wants-more-residents-connected-to-sewer-system/article_a5418e2a-9617-11ed-96e3-d3e9a4d203c8.html',
     },
     {
       org: 'US EPA',

@@ -66,7 +66,7 @@ const SLOTS = [
     x: 74,
     y: 30,
     tag: 'WATER',
-    body: "One aquifer under this limestone serves most of the island's taps. Pumping, leaks, and septic all reach it. The wells are starting to taste like the sea.",
+    body: "Since the last typhoon, Ana's water has come and gone. Her house sits right over the aquifer, with an old septic tank in the yard.",
     difficulty: 2,
   },
   {
@@ -78,7 +78,7 @@ const SLOTS = [
     x: 63,
     y: 18,
     tag: 'ALL STATS',
-    body: "The water turned funny the week they cleared the parcel uphill. The town can't veto the project — but it can make them measure and build it right.",
+    body: 'The water on this side of town has turned black with soot and oil. Is moving away the only answer?',
     difficulty: 3,
   },
 ];

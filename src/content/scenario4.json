@@ -3,10 +3,14 @@
   "title": "Fresh Water & Conservation",
   "location": "North Village",
   "background": "/scenes/scene4.png",
-  "persona": { "name": "Auntie Rose", "sprite": "/sprites/persona4.png", "tint": "#5BA8E0" },
+  "persona": {
+    "name": "Ana",
+    "sprite": "/sprites/persona4.png",
+    "tint": "#5BA8E0"
+  },
   "intro": [
-    "Nina said you were the one to talk to. Our water bill went up, the pressure went down, and last month the water tasted — I don't know — like the beach.",
-    "The whole village pulls from the same lens under our feet.",
-    "Come, I'll show you around the house. Tell me what we're doing wrong, and what isn't our fault."
+    "Hi! Are you new around here? I'm Ana. Since the last typhoon, our water has come and gone, and last month the tap ran cloudy for a day. My brother says the water we drink comes from a lens of fresh water floating on top of the sea, right under our feet, and that if we pump too much or pollute it, it's very hard to fix.",
+    "Our house sits right over it, with an old septic tank in the yard, and nobody has shown me where our water really goes.",
+    "Will you help me keep our water safe and enough for everyone, in good weather and after storms?"
   ]
 }

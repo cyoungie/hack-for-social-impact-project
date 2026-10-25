@@ -4314,3 +4314,343 @@ button.path__node:active {
 .cs-coral--live { fill: color-mix(in srgb, var(--people) 55%, var(--danger)); }
 .cs-coral--white { fill: var(--bg); }
 .cs-coral.is-counted .cs-coral--live { stroke: var(--tag); stroke-width: 6; }
+
+/* ---------- Scenario 4 · water ---------- */
+.hdialog:has(.lenskeeper),
+.hdialog:has(.leakmap),
+.hdialog:has(.kit),
+.hdialog:has(.outage),
+.hdialog:has(.detective),
+.hdialog:has(.council),
+.hdialog:has(.council__hand) {
+  width: min(1100px, 100%);
+}
+.feedback__say { font-size: 15px; font-style: italic; }
+.feedback__say .label { font-style: normal; margin-right: 6px; }
+.feedback__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.water-note {
+  width: 100%;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--water) 14%, var(--bg));
+  border: 2px solid var(--ink);
+  border-left-width: 8px;
+  border-left-color: var(--water);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.water-note .label { color: color-mix(in srgb, var(--water) 50%, var(--ink)); }
+.water-note__pending { color: var(--danger); }
+
+.water-hud {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 4;
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+.budget {
+  display: grid;
+  grid-template-columns: auto 160px auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  box-shadow: 3px 3px 0 rgba(30, 42, 34, 0.25);
+}
+.budget--inline { box-shadow: none; grid-template-columns: auto 1fr; }
+.budget__track { height: 12px; border: 1.5px solid var(--ink); background: var(--bg); }
+.budget__fill { display: block; height: 100%; transition: width 300ms linear; }
+.budget__fill.is-green { background: var(--veg); }
+.budget__fill.is-yellow { background: var(--warning); }
+.budget__fill.is-red { background: var(--danger); }
+.budget__word { font-family: var(--font-pixel); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.lens-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 200px;
+  padding: 6px 10px;
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+}
+.lens-gauge__row { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 6px; }
+.lens-gauge__salt { position: relative; }
+.lens-gauge__safe { position: absolute; inset: 0 auto 0 0; background: var(--select); }
+.lens-gauge__salt .ybar__fill { position: relative; opacity: 0.85; }
+.notebook { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; }
+.notebook__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.notebook__item {
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--water) 14%, var(--bg));
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Lens Keeper */
+.lenskeeper { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; }
+.lenskeeper__side { display: flex; flex-direction: column; gap: 12px; }
+.lens-cut, .drop-cut { display: block; width: 100%; height: auto; border: 2px solid var(--ink); }
+.lc-sky { fill: color-mix(in srgb, var(--sky) 60%, var(--bg)); }
+.lc-plateau { fill: color-mix(in srgb, var(--veg) 55%, var(--panel)); }
+.lc-limestone { fill: color-mix(in srgb, var(--postcard) 70%, var(--faint)); }
+.lc-pore { fill: color-mix(in srgb, var(--faint) 70%, var(--ink)); }
+.lc-lens { fill: color-mix(in srgb, var(--water) 60%, var(--bg)); stroke: var(--water); stroke-width: 2; }
+.lc-sea { fill: color-mix(in srgb, var(--water) 60%, #16395c); }
+.lc-cone { fill: color-mix(in srgb, var(--water) 40%, #16395c); opacity: 0.9; }
+.lc-house { fill: var(--postcard); stroke: var(--ink); stroke-width: 2; }
+.lc-pipe { fill: var(--ink); }
+.lc-txt { font-family: var(--font-pixel); font-size: 10px; letter-spacing: 0.06em; fill: var(--ink); }
+.lc-txt--light { fill: var(--bg); }
+.lenskeeper__months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin-top: 6px; }
+.lk-month {
+  padding: 3px 0;
+  text-align: center;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  border: 1.5px solid var(--ink);
+  background: var(--bg);
+}
+.lk-month.is-dry { border-bottom: 4px solid var(--warning); }
+.lk-month.is-wet { border-bottom: 4px solid var(--water); }
+.lk-month.is-ok { background: var(--select); }
+.lk-month.is-warn { background: var(--risk-rising); }
+.lk-month.is-bad { background: var(--risk-severe); }
+.lk-month.is-now { outline: 2px solid var(--ink); outline-offset: 1px; }
+.lk-slider { display: flex; flex-direction: column; gap: 4px; }
+.lk-slider input { width: 100%; accent-color: var(--accent); }
+
+/* Leak Hunt */
+.leak__lost { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-pixel); font-weight: 700; font-size: 14px; color: color-mix(in srgb, var(--water) 50%, var(--ink)); }
+.leakmap {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--veg) 30%, var(--panel));
+  border: var(--border);
+  border-radius: var(--radius);
+}
+.leakmap.is-waiting { opacity: 0.6; }
+.leakcell { position: relative; aspect-ratio: 1.6; }
+.leakcell.has-pipe::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 45%;
+  height: 10%;
+  background: color-mix(in srgb, var(--faint) 60%, var(--ink));
+}
+.leakcell__tap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 1px dashed rgba(30, 42, 34, 0.15);
+  cursor: crosshair;
+}
+.leakcell__ripple {
+  position: absolute;
+  inset: 20%;
+  border: 3px solid var(--water);
+  border-radius: 50%;
+  animation: ripple-out 600ms ease-out both;
+}
+.leakcell__tap.is-d5 .leakcell__ripple { opacity: 0.15; }
+.leakcell__tap.is-d4 .leakcell__ripple, .leakcell__tap.is-d3 .leakcell__ripple { opacity: 0.35; }
+.leakcell__tap.is-d2 .leakcell__ripple { opacity: 0.7; border-width: 4px; }
+.leakcell__tap.is-d1 .leakcell__ripple { opacity: 1; border-width: 6px; border-color: color-mix(in srgb, var(--water) 60%, var(--ink)); }
+@keyframes ripple-out { from { scale: 0.3; } }
+.leak__pin {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background: var(--risk-severe);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.leak__pin.is-reported { background: var(--select); cursor: default; }
+
+/* Follow the Drop */
+.dc-soil { fill: color-mix(in srgb, var(--soil) 70%, var(--wood)); }
+.dc-toilet { fill: var(--bg); stroke: var(--ink); stroke-width: 2; }
+.dc-tank { fill: color-mix(in srgb, var(--faint) 70%, var(--ink)); stroke: var(--ink); stroke-width: 2; }
+.dc-tank.is-new { fill: var(--veg); }
+.dc-sewer { fill: color-mix(in srgb, var(--faint) 50%, var(--ink)); }
+.dc-drop { fill: var(--tag); stroke: var(--ink); stroke-width: 2; }
+.dc-drop--fast { fill: var(--danger); }
+.drop-bonus { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 12px; background: var(--cream); border: 2px dashed var(--ink); border-radius: var(--radius-sm); }
+
+/* Typhoon Water Kit */
+.kit { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.kit__tray { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+.kit__shelf {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 160px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--wood) 20%, var(--bg));
+  border: 3px dashed var(--ink);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.kit__shelf.is-target { border-color: var(--accent); background: var(--select); }
+.kit__packed { display: flex; flex-wrap: wrap; gap: 6px; }
+.kit__item { display: grid; place-items: center; width: 34px; height: 34px; background: var(--bg); border: 2px solid var(--ink); border-radius: 4px; }
+.outage { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.outage__day { padding: 10px 6px; border: 2px solid var(--ink); border-radius: var(--radius-sm); opacity: 0.25; display: flex; flex-direction: column; gap: 4px; }
+.outage__day.is-shown { opacity: 1; }
+.outage__day.is-ok { background: var(--select); }
+.outage__day.is-dry { background: var(--risk-severe); }
+
+/* Water Detective */
+.detective { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.detective.is-waiting { opacity: 0.6; }
+.grab__item.is-spotted { background: var(--risk-rising); }
+.grab__item.is-target { outline: 3px dashed var(--accent); outline-offset: 2px; }
+
+/* Village Council */
+.council__hand { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.council__pick {
+  min-height: 110px;
+  padding: 12px;
+  text-align: left;
+  background: var(--cream);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 0 var(--ink);
+  font-size: 13px;
+  cursor: pointer;
+}
+.council__pick.is-on { background: var(--select); outline: 3px solid var(--accent); outline-offset: 2px; }
+.council__pick:disabled { opacity: 0.5; cursor: default; }
+.council { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.council__card { position: relative; padding: 12px 14px; background: var(--cream); border: var(--border); border-radius: var(--radius); }
+.council__card.is-pass { background: var(--select); }
+.council__card.is-fail { background: var(--risk-severe); }
+.council__text { font-weight: 600; margin-bottom: 8px; padding-right: 110px; }
+.council__votes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.council__vote { display: flex; flex-direction: column; align-items: center; padding: 4px; border: 2px solid var(--ink); border-radius: 4px; background: var(--bg); font-family: var(--font-pixel); font-size: 12px; font-weight: 700; }
+.council__vote.is-yes { background: var(--veg); }
+.council__vote.is-no { background: var(--faint); color: var(--bg); }
+.council__stamp { position: absolute; top: 10px; right: 12px; padding: 2px 8px; border: 2px solid var(--ink); background: var(--bg); font-family: var(--font-pixel); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+
+/* Water scene */
+.ws-ground { fill: color-mix(in srgb, var(--veg) 55%, var(--panel)); }
+.ws-tower rect { fill: color-mix(in srgb, var(--faint) 40%, var(--bg)); stroke: var(--ink); stroke-width: 4; }
+.ws-tower .ws-tower__band { fill: var(--water); }
+.ws-tower .ws-leg { fill: var(--ink); stroke: none; }
+.ws-txt { font-family: var(--font-pixel); font-size: 16px; font-weight: 700; letter-spacing: 0.06em; fill: var(--ink); }
+.ws-txt--light { fill: var(--bg); }
+.ws-pipe { fill: var(--ink); }
+.ws-shelf { fill: color-mix(in srgb, var(--wood) 40%, var(--bg)); stroke: var(--ink); stroke-width: 3; }
+.ws-jug { fill: color-mix(in srgb, var(--water) 50%, var(--bg)); stroke: var(--ink); stroke-width: 2; }
+.ws-barrel { fill: color-mix(in srgb, var(--water) 60%, var(--ink)); stroke: var(--ink); stroke-width: 3; }
+.ws-faucet { fill: var(--faint); stroke: var(--ink); stroke-width: 2; }
+.ws-spray { fill: var(--water); }
+.ws-lid { fill: color-mix(in srgb, var(--faint) 60%, var(--bg)); stroke: var(--ink); stroke-width: 3; }
+.ws-tank { fill: color-mix(in srgb, var(--faint) 70%, var(--ink)); stroke: var(--ink); stroke-width: 3; }
+.ws-tank.is-new { fill: var(--veg); }
+.ws-sewer { fill: color-mix(in srgb, var(--faint) 50%, var(--ink)); }
+.ws-leach { fill: none; stroke: color-mix(in srgb, var(--soil) 70%, var(--wood)); stroke-width: 14; stroke-dasharray: 12 8; }
+.ws-mainpipe { fill: color-mix(in srgb, var(--faint) 60%, var(--ink)); }
+.ws-leak rect { fill: var(--water); }
+.ws-patch { fill: var(--tag); stroke: var(--ink); stroke-width: 3; }
+.ws-hall { fill: var(--postcard); }
+.ws-pediment { fill: color-mix(in srgb, var(--water) 55%, var(--ink)); stroke: var(--ink); stroke-width: 4; }
+.ws-column { fill: var(--bg); stroke: var(--ink); stroke-width: 2; }
+.ws-banner { fill: var(--risk-rising); stroke: var(--ink); stroke-width: 3; }
+.ws-banner.is-good { fill: var(--select); }
+.ws-seep path { fill: none; stroke: var(--water); stroke-width: 4; stroke-dasharray: 10 14; animation: flow 1.4s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .leakcell__ripple, .ws-seep path { animation: none; }
+  .budget__fill { transition: none; }
+}
+
+/* ---------- Scenario 5 · town ---------- */
+.hdialog:has(.invite),
+.hdialog:has(.questions) {
+  width: min(960px, 100%);
+}
+.townhall__q { font-size: 16px; font-style: italic; }
+.invite { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.invite .council__pick { min-height: 64px; }
+.questions { display: flex; flex-direction: column; gap: 6px; }
+.question {
+  padding: 10px 12px;
+  text-align: left;
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  cursor: pointer;
+}
+.question.is-on { background: var(--select); box-shadow: 3px 3px 0 var(--ink); }
+.question--others { background: var(--cream); font-style: italic; }
+.reply {
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--people) 16%, var(--bg));
+  border: 2px solid var(--ink);
+  border-left-width: 8px;
+  border-left-color: var(--people);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+}
+.reflect textarea { resize: vertical; font-family: var(--font-body); }
+
+.stage.is-zoomed .scenery { transform: scale(1.5); transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%); transition: transform 380ms ease-out; }
+.stage .scenery { transition: transform 300ms ease-out; }
+
+.ts-sky { fill: color-mix(in srgb, var(--faint) 35%, var(--cloud)); }
+.ts-soot rect { fill: color-mix(in srgb, var(--ink) 70%, var(--faint)); opacity: 0.7; }
+.ts-base { fill: color-mix(in srgb, var(--faint) 35%, var(--panel)); }
+.ts-runway { fill: color-mix(in srgb, var(--faint) 60%, var(--ink)); }
+.ts-stripe { fill: var(--bg); }
+.ts-hangar { fill: color-mix(in srgb, var(--faint) 45%, var(--bg)); stroke: var(--ink); stroke-width: 4; }
+.ts-hangar__door { fill: color-mix(in srgb, var(--faint) 70%, var(--ink)); }
+.ts-tower, .ts-tower__cab { fill: var(--postcard); stroke: var(--ink); stroke-width: 3; }
+.ts-fence rect { fill: var(--ink); }
+.ts-factory { fill: color-mix(in srgb, var(--faint) 55%, var(--bg)); stroke: var(--ink); stroke-width: 4; }
+.ts-factory__roof { fill: color-mix(in srgb, var(--faint) 70%, var(--ink)); }
+.ts-stack { fill: color-mix(in srgb, var(--danger) 45%, var(--wood)); stroke: var(--ink); stroke-width: 3; }
+.ts-tank { fill: color-mix(in srgb, var(--faint) 40%, var(--bg)); stroke: var(--ink); stroke-width: 3; }
+.ts-ground { fill: color-mix(in srgb, var(--veg) 35%, var(--soil)); }
+.ts-stream { fill: none; stroke: color-mix(in srgb, var(--ink) 60%, var(--water)); stroke-width: 40; }
+.ts-stream.is-clear { stroke: var(--water); }
+.ts-sheen { fill: none; stroke: var(--people); stroke-width: 6; opacity: 0.7; }
+.ts-blackwater { fill: var(--ink); }
+.ts-hall { fill: var(--postcard); stroke: var(--ink); stroke-width: 4; }
+.ts-hall__sign { fill: var(--tag); stroke: var(--ink); stroke-width: 3; }
+.ts-person { fill: var(--people); stroke: var(--ink); stroke-width: 2; }
+.ts-table { fill: var(--wood); stroke: var(--ink); stroke-width: 3; }
+.ts-filter { fill: var(--bg); stroke: var(--ink); stroke-width: 4; }
+.ts-filter__stage { fill: color-mix(in srgb, var(--water) 40%, var(--bg)); stroke: var(--ink); stroke-width: 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stage .scenery, .stage.is-zoomed .scenery { transition: none; }
+}
