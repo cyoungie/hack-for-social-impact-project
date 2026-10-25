@@ -3,7 +3,6 @@ import { useGame } from '../state/GameState.jsx';
 import { avatarColorValue } from '../data/game.js';
 import { Avatar } from './Avatar.jsx';
 import { Icon } from './Icons.jsx';
-import { useComingSoon } from './useComingSoon.jsx';
 
 export const PixelButton = forwardRef(function PixelButton({ className = '', children, ...props }, ref) {
   return (
@@ -83,11 +82,13 @@ export function SquareRadio({ name, value, checked, onChange, children }) {
   );
 }
 
-const NAV_LINKS = ['ISLAND', 'BIOMES', 'COMPARE', 'ACT'];
+const NAV_LINKS = [
+  { id: 'GAME', scene: 'map' },
+  { id: 'ACT', scene: 'act' },
+];
 
 export function Nav({ plate, active }) {
   const { state, goTo } = useGame();
-  const comingSoon = useComingSoon();
   return (
     <header className="nav">
       <div className="nav__left">
@@ -95,28 +96,17 @@ export function Nav({ plate, active }) {
         <Plate>{plate}</Plate>
       </div>
       <nav className="nav__right" aria-label="Main">
-        {NAV_LINKS.map((link) =>
-          link === 'ISLAND' ? (
-            <button
-              key={link}
-              type="button"
-              className={`nav__link ${active === link ? 'is-active' : ''}`}
-              aria-current={active === link ? 'page' : undefined}
-              onClick={() => goTo('map')}
-            >
-              {link}
-            </button>
-          ) : (
-            <button
-              key={link}
-              type="button"
-              className="nav__link is-soon"
-              onClick={() => comingSoon(link.charAt(0) + link.slice(1).toLowerCase())}
-            >
-              {link}
-            </button>
-          ),
-        )}
+        {NAV_LINKS.map((link) => (
+          <button
+            key={link.id}
+            type="button"
+            className={`nav__link ${active === link.id ? 'is-active' : ''}`}
+            aria-current={active === link.id ? 'page' : undefined}
+            onClick={() => goTo(link.scene)}
+          >
+            {link.id}
+          </button>
+        ))}
         <span className="nav__chip" title={state.playerName}>
           <Avatar color={avatarColorValue(state.avatarColor)} size={28} />
         </span>

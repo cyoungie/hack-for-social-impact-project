@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { PixelButton, SquareRadio } from '../components/ui.jsx';
+import { compareWith } from '../data/scoring.js';
 
 // P1 — pick one option, "Recommend selection", the runner shows that option's feedback.
 export default function ChoiceCard({ config, onComplete }) {
   const [choice, setChoice] = useState('');
   const option = config.options.find((o) => o.id === choice);
+  // Compare against the best choice — or, if you made it, the most common wrong one.
+  const alternative = (o) =>
+    o.correct ? config.options.find((x) => !x.correct && !x.ok) : config.options.find((x) => x.correct);
 
   return (
     <div className="prim">
@@ -27,6 +31,10 @@ export default function ChoiceCard({ config, onComplete }) {
             feedback: option.feedback,
             verdict: option.correct ? 'correct' : option.ok ? 'ok' : 'wrong',
             state: option.id,
+            compare: (() => {
+              const alt = alternative(option);
+              return alt && compareWith(alt.label, alt.points, alt.feedback);
+            })(),
           })
         }
       >

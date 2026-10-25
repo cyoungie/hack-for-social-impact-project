@@ -18,10 +18,11 @@ export function sumPoints(list) {
   return list.reduce((acc, p) => addPoints(acc, p), {});
 }
 
-export function clampBars(bars) {
-  const out = {};
-  for (const { key } of STATS) out[key] = Math.min(100, Math.max(0, bars[key] ?? 0));
-  return out;
+// The alternative outcome shown beside a choice ("compare"). Skips one-word openers like "Right."
+export function compareWith(label, points, feedback) {
+  const sentences = feedback.match(/[^.!?]+[.!?]+/g) || [feedback];
+  const note = (sentences.find((x) => x.trim().length > 25) || sentences[0]).trim();
+  return { label, points: points || {}, note };
 }
 
 // Non-zero entries in stat order, e.g. [{ key: 'veg', label: 'VEG', color, value: 5 }].

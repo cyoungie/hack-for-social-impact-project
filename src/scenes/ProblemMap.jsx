@@ -1,11 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useGame } from '../state/GameState.jsx';
 import { PROBLEMS } from '../data/game.js';
-import { STATS } from '../data/scoring.js';
 import { isBuilt, lockedBy } from '../scenarios/index.js';
-import { Nav, Plate, SegmentBar } from '../components/ui.jsx';
+import { Nav, Plate } from '../components/ui.jsx';
 import { Icon } from '../components/Icons.jsx';
-import { PointChips } from '../components/PointChips.jsx';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
@@ -143,7 +141,7 @@ function usePanZoom(viewRef) {
 }
 
 export default function ProblemMap() {
-  const { state, update, openIntro } = useGame();
+  const { state, openIntro } = useGame();
   const [active, setActive] = useState(null);
   const [imgOk, setImgOk] = useState(true);
   const oceanRef = useRef(null);
@@ -158,16 +156,10 @@ export default function ProblemMap() {
     if (playable(p)) openIntro(p.id);
   };
 
-  // Float the last card's points up once, then clear them.
-  useEffect(() => {
-    if (!state.lastGain) return undefined;
-    const t = setTimeout(() => update({ lastGain: null }), 2600);
-    return () => clearTimeout(t);
-  }, [state.lastGain, update]);
 
   return (
     <div className="app-shell">
-      <Nav plate="GUAM · TROPICAL ISLAND" active="ISLAND" />
+      <Nav plate="GUAM · TROPICAL ISLAND" active="GAME" />
       <main className="map">
         <section className="ocean" aria-label="Map of Guam" ref={oceanRef}>
           <div className="ocean__ripples" aria-hidden="true">
@@ -285,22 +277,6 @@ export default function ProblemMap() {
               );
             })}
           </ul>
-
-          <div className="health">
-            <div className="health__head">
-              <span className="label">Island health</span>
-              {state.lastGain && <PointChips points={state.lastGain} float />}
-            </div>
-            {STATS.map((s) => (
-              <div key={s.key} className="health__row">
-                <span className="health__label" style={{ color: s.color }}>
-                  {s.label}
-                </span>
-                <SegmentBar value={state.bars[s.key]} color={s.color} label={`${s.label} ${state.bars[s.key]}`} />
-                <span className="health__num">{state.bars[s.key]}</span>
-              </div>
-            ))}
-          </div>
 
           <p className="sidebar__foot">
             {builtCount} of 5 places are fully playable so far. Solve all five to unlock your island proposal — a real one-pager

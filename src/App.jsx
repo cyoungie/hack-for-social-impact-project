@@ -6,6 +6,7 @@ import Postcard from './scenes/Postcard.jsx';
 import ProblemMap from './scenes/ProblemMap.jsx';
 import ScenarioIntro from './scenes/ScenarioIntro.jsx';
 import GameScene from './scenes/GameScene.jsx';
+import Act from './scenes/Act.jsx';
 
 const SCENES = {
   account: Account,
@@ -14,6 +15,7 @@ const SCENES = {
   map: ProblemMap,
   intro: ScenarioIntro,
   game: GameScene,
+  act: Act,
 };
 
 export default function App() {

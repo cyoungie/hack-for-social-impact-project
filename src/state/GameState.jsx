@@ -1,12 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { addPoints, clampBars } from '../data/scoring.js';
 
 const STORAGE_KEY = 'cg_save';
 const VERSION = 2;
 
-export const SCENE_ORDER = ['account', 'biome', 'postcard', 'map', 'intro', 'game'];
-
-export const START_BARS = { water: 52, soil: 58, veg: 60, people: 55 };
+export const SCENE_ORDER = ['account', 'biome', 'postcard', 'map', 'intro', 'game', 'act'];
 
 const INITIAL = {
   version: VERSION,
@@ -14,15 +11,12 @@ const INITIAL = {
   avatarColor: 'green',
   scene: 'account',
   solvedProblems: [],
-  bars: START_BARS,
   // Intro being shown (never saved — a refresh during an intro lands back on the map).
   introId: null,
   // Map slot whose GameScene is open.
   gameId: null,
   // Active scenario: { id, phase: 'explore'|'consequence'|'card', done: { hotspotId: { points, state } } }
   run: null,
-  // Points from the last collected card, floated up on the map hub once.
-  lastGain: null,
 };
 
 function load() {
@@ -35,7 +29,9 @@ function load() {
       const scene = saved.playerName && SCENE_ORDER.includes(saved.scene) ? saved.scene : saved.playerName ? 'map' : 'account';
       return { ...INITIAL, playerName: saved.playerName || '', avatarColor: saved.avatarColor || 'green', scene };
     }
-    const state = { ...INITIAL, ...saved, bars: { ...START_BARS, ...(saved.bars || {}) } };
+    // Stat bars are feedback on choices, never a managed resource — older saves' totals are dropped.
+    const { bars, lastGain, ...kept } = saved;
+    const state = { ...INITIAL, ...kept };
     if (!Array.isArray(state.solvedProblems)) state.solvedProblems = [];
     // Saves from before the intro/game split.
     if (state.scene === 'scenario') Object.assign(state, { scene: state.run ? 'game' : 'map', gameId: state.run?.id ?? null });
@@ -91,16 +87,13 @@ export function GameStateProvider({ children }) {
     [],
   );
 
-  // Replaying a solved scenario is allowed, but only the first run moves the bars.
   const collect = useCallback(
-    (id, points) =>
+    (id) =>
       setState((s) => ({
         ...s,
         scene: 'map',
         run: null,
         gameId: null,
-        bars: s.solvedProblems.includes(id) ? s.bars : clampBars(addPoints(s.bars, points)),
-        lastGain: s.solvedProblems.includes(id) ? null : points,
         solvedProblems: s.solvedProblems.includes(id) ? s.solvedProblems : [...s.solvedProblems, id],
       })),
     [],

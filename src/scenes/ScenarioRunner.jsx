@@ -220,8 +220,8 @@ export default function ScenarioRunner({ scenario: sc, content }) {
           )}
           {run.phase === 'explore' && !allDone && (
             <p className="caption">
-              {Object.keys(done).length} of {sc.hotspots.length} stops done. Points land on the island's four bars when
-              you collect the knowledge card.
+              {Object.keys(done).length} of {sc.hotspots.length} stops done. Each choice shows what it does to the land —
+              and what the other choice would have done.
             </p>
           )}
         </aside>
@@ -247,6 +247,14 @@ export default function ScenarioRunner({ scenario: sc, content }) {
               <p className="label">{VERDICT[result.verdict]}</p>
               <p>{result.feedback}</p>
               <PointChips points={result.points} emptyText="No change to the bars." />
+              {result.compare && (
+                <div className="compare">
+                  <p className="label">Compare · the other choice</p>
+                  <p className="compare__label">{result.compare.label}</p>
+                  <PointChips points={result.compare.points} emptyText="No change to the bars." />
+                  <p className="compare__note">{result.compare.note}</p>
+                </div>
+              )}
               <PixelButton onClick={closeHotspot}>Continue</PixelButton>
             </div>
           ) : (
@@ -264,7 +272,7 @@ export default function ScenarioRunner({ scenario: sc, content }) {
           totals={totals}
           outcome={outcome}
           playerName={state.playerName}
-          onCollect={() => collect(sc.id, totals)}
+          onCollect={() => collect(sc.id)}
           onBack={() => goTo('map')}
         />
       )}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PixelButton } from '../components/ui.jsx';
 import { Icon } from '../components/Icons.jsx';
 import { usePick } from '../components/usePick.js';
+import { compareWith } from '../data/scoring.js';
 
 // P4 — drag an icon onto a day of the 7-day forecast, then pick a time (or skip the week).
 export default function ForecastStrip({ config, onComplete }) {
@@ -24,6 +25,9 @@ export default function ForecastStrip({ config, onComplete }) {
       feedback: good ? config.feedbackGood : config.feedbackBad({ day: d, time, skip }),
       verdict: good ? 'correct' : 'wrong',
       state: skip ? 'skip' : `${day}-${time}`,
+      compare: good
+        ? compareWith('Watering at noon, as before', {}, 'Noon watering mostly evaporates before it reaches the roots.')
+        : compareWith('Early morning on a dry day — or skipping the week', config.points, config.feedbackGood),
     });
   };
 

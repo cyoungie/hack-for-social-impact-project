@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SAFE_YIELD } from '../data/game.js';
 import { PixelButton } from '../components/ui.jsx';
+import { compareWith } from '../data/scoring.js';
 import { PumpSlider } from '../components/PumpSlider.jsx';
 
 // Chloride reading climbs slowly up to safe yield, then fast past it.
@@ -52,7 +53,14 @@ export default function PumpDial({ config, onComplete }) {
         onClick={() => {
           const ok = value <= SAFE_YIELD;
           const r = ok ? config.under : config.over;
-          onComplete({ points: r.points, feedback: r.feedback, verdict: ok ? 'correct' : 'wrong', state: value });
+          const alt = ok ? config.over : config.under;
+          onComplete({
+            points: r.points,
+            feedback: r.feedback,
+            verdict: ok ? 'correct' : 'wrong',
+            state: value,
+            compare: compareWith(ok ? 'Pumping past safe yield' : 'Holding at or under safe yield', alt.points, alt.feedback),
+          });
         }}
       >
         Set the dial
