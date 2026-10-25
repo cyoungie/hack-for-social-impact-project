@@ -3914,3 +3914,169 @@ button.path__node:active {
   .blk--field-bare { animation: none; }
   .xs__tine { transition: none; }
 }
+
+/* ---------- Illustrated scenes: area hotspots ---------- */
+.hotspot-area {
+  position: absolute;
+  z-index: 3;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.hotspot-area:hover:not(:disabled),
+.hotspot-area:focus-visible {
+  outline: 4px dashed var(--tag);
+  outline-offset: 2px;
+  animation: shimmer 900ms steps(2) infinite;
+}
+
+.hotspot-area:disabled {
+  cursor: default;
+}
+
+.hotspot-area__label {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 3px;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.hotspot-area.is-done .hotspot-area__label {
+  background: var(--deep);
+}
+
+/* ---------- Farm illustration (Scenario 1) ---------- */
+.farm {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.fs-sky { fill: color-mix(in srgb, var(--sky) 70%, var(--bg)); }
+.fs-sun rect { fill: var(--tag); }
+.fs-cloud rect { fill: var(--cloud); }
+.fs-raincloud__top { fill: color-mix(in srgb, var(--faint) 40%, var(--cloud)); }
+.fs-raincloud__belly { fill: color-mix(in srgb, var(--faint) 75%, var(--ink)); }
+.fs-rain rect { fill: var(--water); }
+.fs-rain { animation: rain-fall 600ms steps(3) infinite; }
+@keyframes rain-fall {
+  to { translate: -6px 18px; }
+}
+.fs-hills rect { fill: color-mix(in srgb, var(--veg) 55%, var(--ink)); }
+.fs-grass { fill: color-mix(in srgb, var(--veg) 70%, var(--panel)); }
+.fs-tuft rect { fill: color-mix(in srgb, var(--veg) 60%, var(--ink)); }
+
+.fs-trunk rect { fill: var(--wood); }
+.fs-frond rect { fill: color-mix(in srgb, var(--veg) 65%, var(--ink)); }
+.fs-coconut rect { fill: color-mix(in srgb, var(--wood) 60%, var(--ink)); }
+
+.fs-house__wall { fill: color-mix(in srgb, var(--soil) 55%, var(--postcard)); stroke: var(--ink); stroke-width: 4; }
+.fs-house__plank { fill: color-mix(in srgb, var(--wood) 45%, var(--postcard)); }
+.fs-house__roof { fill: color-mix(in srgb, var(--danger) 60%, var(--wood)); stroke: var(--ink); stroke-width: 4; }
+.fs-house__door { fill: var(--wood); stroke: var(--ink); stroke-width: 4; }
+.fs-house__window { fill: color-mix(in srgb, var(--water) 45%, var(--bg)); stroke: var(--ink); stroke-width: 4; }
+.fs-house__frame { fill: var(--ink); }
+
+.fs-red { fill: var(--danger); stroke: var(--ink); stroke-width: 4; }
+.fs-red-dark { fill: color-mix(in srgb, var(--danger) 60%, var(--ink)); }
+.fs-cab { fill: none; stroke: var(--ink); stroke-width: 6; }
+.fs-glass { fill: color-mix(in srgb, var(--water) 35%, var(--bg)); }
+.fs-roof { fill: var(--postcard); stroke: var(--ink); stroke-width: 4; }
+.fs-steel { fill: color-mix(in srgb, var(--faint) 60%, var(--ink)); }
+.fs-tire { fill: var(--ink); }
+.fs-hub { fill: var(--tag); stroke: var(--ink); stroke-width: 3; }
+
+.fs-field__base { fill: color-mix(in srgb, var(--soil) 75%, var(--wood)); }
+.fs-field--mulch .fs-field__base { fill: color-mix(in srgb, var(--tag) 45%, var(--soil)); }
+.fs-field--bare .fs-field__base { fill: color-mix(in srgb, var(--soil) 85%, var(--postcard)); }
+.fs-field--contour .fs-field__base { fill: color-mix(in srgb, var(--soil) 70%, var(--veg)); }
+.fs-field__edge { fill: none; stroke: var(--ink); stroke-width: 5; }
+.fs-row { fill: color-mix(in srgb, var(--wood) 70%, var(--ink)); }
+.fs-row--light { fill: color-mix(in srgb, var(--wood) 80%, var(--soil)); }
+.fs-row--faint { fill: color-mix(in srgb, var(--wood) 35%, var(--soil)); }
+.fs-straw { fill: color-mix(in srgb, var(--tag) 80%, var(--postcard)); }
+.fs-straw--dark { fill: color-mix(in srgb, var(--warning) 70%, var(--wood)); }
+.fs-sprout rect { fill: var(--veg); }
+.fs-rivulet {
+  fill: none;
+  stroke: var(--water);
+  stroke-width: 6;
+  stroke-dasharray: 14 10;
+  animation: flow 900ms linear infinite;
+}
+.fs-contour {
+  fill: none;
+  stroke: color-mix(in srgb, var(--wood) 70%, var(--ink));
+  stroke-width: 9;
+}
+.fs-furrow { fill: color-mix(in srgb, var(--wood) 55%, var(--ink)); }
+.fs-mudflow {
+  fill: none;
+  stroke: color-mix(in srgb, var(--soil) 60%, var(--water));
+  stroke-width: 6;
+  stroke-dasharray: 16 12;
+  animation: flow 700ms linear infinite;
+}
+@keyframes flow {
+  to { stroke-dashoffset: -24; }
+}
+.fs-leaf { fill: color-mix(in srgb, var(--veg) 85%, var(--ink)); stroke: var(--ink); stroke-width: 2; }
+.fs-leaf--top { fill: var(--veg); }
+.fs-crops--poor .fs-leaf { fill: color-mix(in srgb, var(--warning) 70%, var(--veg)); }
+.fs-crops--poor .fs-leaf--top { fill: var(--warning); }
+
+.fs-stream rect { fill: var(--water); }
+.fs-stream.is-muddy rect { fill: color-mix(in srgb, var(--soil) 80%, var(--wood)); }
+.fs-stream__shine rect { fill: var(--cloud); opacity: 0.8; }
+.fs-stream.is-muddy .fs-stream__shine rect { fill: var(--soil); }
+
+.fs-sand { fill: color-mix(in srgb, var(--tag) 45%, var(--postcard)); }
+.fs-sea { fill: color-mix(in srgb, var(--water) 80%, #1d4c78); }
+.fs-wave rect { fill: var(--cloud); opacity: 0.7; }
+.fs-mudfan rect { fill: color-mix(in srgb, var(--soil) 75%, var(--wood)); opacity: 0.75; }
+.fs-coral-a { fill: color-mix(in srgb, var(--danger) 70%, var(--postcard)); }
+.fs-coral-b { fill: var(--people); }
+.fs-coral-c { fill: var(--warning); }
+.fs-reef.is-grey rect { fill: color-mix(in srgb, var(--faint) 55%, var(--bg)); }
+.fs-plume {
+  fill: none;
+  stroke: var(--veg);
+  stroke-width: 26;
+  opacity: 0.55;
+  stroke-dasharray: 40 14;
+  animation: flow 1.2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fs-rain,
+  .fs-rivulet,
+  .fs-mudflow,
+  .fs-plume {
+    animation: none;
+  }
+}
+
+.hotspot-area.is-label-below .hotspot-area__label {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
+
+.fs-tread { fill: var(--ink); }
+.fs-rim { fill: color-mix(in srgb, var(--faint) 45%, var(--ink)); }

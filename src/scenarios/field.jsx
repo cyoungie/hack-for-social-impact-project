@@ -1,4 +1,5 @@
-import { Mark, Trace } from './stageKit.jsx';
+import { Mark } from './stageKit.jsx';
+import FarmScene from './scenes/FarmScene.jsx';
 
 const TILL = {
   right:
@@ -30,19 +31,27 @@ export default {
     { id: 'reef', tone: 'reef-live', x: 84, y: 88, w: 13, h: 9 },
   ],
 
-  // The field (and stream/reef) change as soon as each choice is made.
-  liveSwap(done) {
-    const swap = {};
+  // Illustrated scene. The field, stream, and reef change as soon as each choice is made;
+  // `outcome` is set once the consequence frame plays.
+  Scene: FarmScene,
+  sceneState(done, outcome) {
     const cover = done.cover?.state;
-    if (cover) swap.field = { mulch: 'field-mulch', cover: 'field-seedlings', bare: 'field-bare' }[cover];
     const till = done.tractor?.state;
-    if (till) {
-      const ok = till.path === 'contour' && till.depth !== 'deep';
-      swap.field = ok ? 'field-contour' : 'field-furrows';
-      if (!ok) swap.stream = 'stream-muddy';
-    }
-    if (done.clouds && !done.clouds.state.fertGood) swap.reef = 'reef-grey';
-    return swap;
+    const tillOk = till && till.path === 'contour' && till.depth !== 'deep';
+    const fert = done.clouds?.state;
+    let field = 'plowed';
+    if (cover) field = { mulch: 'mulch', cover: 'seedlings', bare: 'bare' }[cover];
+    if (till) field = tillOk ? 'contour' : 'furrows';
+    let crops = fert ? (fert.fertGood ? 'healthy' : 'poor') : null;
+    if (outcome) crops = outcome === 'good' ? 'healthy' : 'poor';
+    if (outcome === 'bad') field = 'furrows';
+    return {
+      field,
+      crops,
+      muddy: outcome ? outcome === 'bad' : Boolean(till && !tillOk),
+      reefGrey: outcome ? outcome === 'bad' : Boolean(fert && !fert.fertGood),
+      plume: Boolean(fert && !fert.fertGood) || outcome === 'bad',
+    };
   },
 
   hotspots: [
@@ -52,6 +61,7 @@ export default {
       icon: 'grass',
       x: 45,
       y: 57,
+      box: { x: 22.2, y: 39.5, w: 47.2, h: 46 },
       kind: 'choice',
       prompt:
         'Many tropical islands time their crop rotations around the wet and dry seasons. Help Jack choose how to manage the field between plantings:',
@@ -89,6 +99,8 @@ export default {
       icon: 'tractor',
       x: 11,
       y: 70,
+      box: { x: 6.4, y: 58, w: 14.4, h: 23 },
+      labelBelow: true,
       kind: 'till',
       prompt: "Jack needs to prepare the field for the next planting. Set the tiller's depth, then drive the tractor across the field to till it.",
       config: {
@@ -110,8 +122,9 @@ export default {
       id: 'clouds',
       label: 'The clouds',
       icon: 'rain',
-      x: 46,
-      y: 12,
+      x: 50,
+      y: 14,
+      box: { x: 38.6, y: 3.6, w: 22.2, h: 23 },
       kind: 'fertilizer',
       prompt:
         'The rainy season is starting, and Jack needs to fertilize the young crops this week. Check the forecast and pick the best day to apply fertilizer.',
@@ -149,28 +162,24 @@ export default {
     return (
       <>
         {cover && !till && (
-          <Mark x={24} y={84} icon="grass" tone={cover === 'bare' ? 'danger' : 'veg'}>
+          <Mark x={24} y={88} icon="grass" tone={cover === 'bare' ? 'danger' : 'veg'}>
             {{ mulch: 'Straw mulch layer', cover: 'Cover crop seedlings', bare: 'Bare soil — runoff' }[cover]}
           </Mark>
         )}
         {till && (
-          <Mark x={24} y={84} icon="tractor" tone={tillOk ? 'veg' : 'danger'}>
+          <Mark x={24} y={88} icon="tractor" tone={tillOk ? 'veg' : 'danger'}>
             {tillOk ? 'Contour rows, surface intact' : 'Deep furrows — muddy runoff'}
           </Mark>
         )}
-        {till && !tillOk && <Trace from={[56, 80]} to={[74, 70]} tone="soil" />}
         {done.clouds &&
           (done.clouds.state.fertGood ? (
-            <Mark x={40} y={28} icon="grass" tone="veg">
+            <Mark x={40} y={30} icon="grass" tone="veg">
               Crops green — nutrients in the soil
             </Mark>
           ) : (
-            <>
-              <Trace from={[60, 70]} to={[90, 92]} tone="plume" />
-              <Mark x={56} y={92} icon="coral" tone="danger">
-                Nutrient plume over the reef
-              </Mark>
-            </>
+            <Mark x={52} y={92} icon="coral" tone="danger">
+              Nutrient plume over the reef
+            </Mark>
           ))}
       </>
     );

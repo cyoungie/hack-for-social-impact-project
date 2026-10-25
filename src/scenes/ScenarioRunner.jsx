@@ -105,7 +105,8 @@ export default function ScenarioRunner({ scenario: sc, content }) {
   const Primitive = open && PRIMITIVES[open.kind];
 
   const visit = (h) => {
-    setPos({ x: h.x, y: Math.min(h.y + 12, 94) });
+    // Walk to just below the object (or below the icon sprite).
+    setPos(h.box ? { x: h.box.x + h.box.w / 2, y: Math.min(h.box.y + h.box.h + 6, 94) } : { x: h.x, y: Math.min(h.y + 12, 94) });
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setOpenId(h.id), reducedMotion() ? 0 : 380);
   };
@@ -130,15 +131,38 @@ export default function ScenarioRunner({ scenario: sc, content }) {
       <main className="scenario">
         <div className="scenario__main">
           <section className="stage" aria-label="Scene">
-            <Scenery
-              src={content.background}
-              blocks={sc.blocks}
-              swap={{ ...sc.liveSwap?.(done), ...(showOutcome ? sc.consequence[outcome].swap : {}) }}
-            />
-            <div className="stage__overlays">{sc.overlays(done)}</div>
+            {sc.Scene ? (
+              <div className="scenery" aria-hidden="true">
+                <sc.Scene {...sc.sceneState(done, showOutcome ? outcome : null)} />
+              </div>
+            ) : (
+              <Scenery
+                src={content.background}
+                blocks={sc.blocks}
+                swap={{ ...sc.liveSwap?.(done), ...(showOutcome ? sc.consequence[outcome].swap : {}) }}
+              />
+            )}
+            {/* Per-choice labels; the consequence frame shows its own. */}
+            {!showOutcome && <div className="stage__overlays">{sc.overlays(done)}</div>}
 
             {!showOutcome &&
-              sc.hotspots.map((h) => (
+              sc.hotspots.map((h) =>
+              h.box ? (
+                // Illustrated scenes: the drawn object itself is the hotspot.
+                <button
+                  key={h.id}
+                  type="button"
+                  className={`hotspot-area ${done[h.id] ? 'is-done' : ''} ${h.labelBelow ? 'is-label-below' : ''}`}
+                  style={{ left: `${h.box.x}%`, top: `${h.box.y}%`, width: `${h.box.w}%`, height: `${h.box.h}%` }}
+                  disabled={run.phase !== 'explore' || Boolean(done[h.id])}
+                  onClick={() => visit(h)}
+                >
+                  <span className="hotspot-area__label">
+                    {done[h.id] && <Icon name="check" size={12} strokeWidth={3} />}
+                    {h.label}
+                  </span>
+                </button>
+              ) : (
                 <button
                   key={h.id}
                   type="button"
@@ -157,7 +181,8 @@ export default function ScenarioRunner({ scenario: sc, content }) {
                   </span>
                   <span className="hotspot__label">{h.label}</span>
                 </button>
-              ))}
+              ),
+            )}
 
             {run.phase === 'explore' && (
               <span className="walker" style={{ left: `${pos.x}%`, top: `${pos.y}%` }} aria-hidden="true">
