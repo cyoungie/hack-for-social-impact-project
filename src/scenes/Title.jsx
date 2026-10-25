@@ -36,9 +36,7 @@ export default function Title() {
         <PixelButton className="title-screen__play" onClick={() => goTo(state.resumeScene || 'account')} data-autofocus>
           Play
         </PixelButton>
-        <p className="title-screen__note">
-          {returning ? `Welcome back, ${state.playerName}.` : 'Built on real satellite data and real science.'}
-        </p>
+        {returning && <p className="title-screen__note">Welcome back, {state.playerName}.</p>}
       </div>
 
       <footer className="title-screen__foot">
