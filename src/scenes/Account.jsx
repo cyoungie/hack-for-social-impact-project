@@ -20,7 +20,7 @@ export default function Account() {
       <section className="account__form">
         <span className="wordmark">Common Ground</span>
         <StepSquares step={1} label="Your account" />
-        <h1 tabIndex={-1}>Make your planner.</h1>
+        <h1 tabIndex={-1}>Start where you stand.</h1>
         <form onSubmit={submit} className="stack">
           <div className="field">
             <label className="label" htmlFor="planner-name">
