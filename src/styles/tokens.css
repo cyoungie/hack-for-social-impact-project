@@ -34,6 +34,12 @@
   /* Ocean viewport (one of two allowed gradients) */
   --ocean: linear-gradient(165deg, #2e73a6, #1d4c78 55%, #16395c);
 
+  /* Title screen: sky into ocean */
+  --sky: #7dbde8;
+  --cloud: #e4f1fa;
+  --mint: #7ee0a1;
+  --title-sky: linear-gradient(180deg, var(--sky) 0%, #2e73a6 52%, #16395c 100%);
+
   /* Construction */
   --border-w: 3px;
   --border: var(--border-w) solid var(--ink);

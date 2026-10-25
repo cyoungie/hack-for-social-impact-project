@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useGame } from './state/GameState.jsx';
+import Title from './scenes/Title.jsx';
 import Account from './scenes/Account.jsx';
 import Biome from './scenes/Biome.jsx';
 import Postcard from './scenes/Postcard.jsx';
@@ -10,6 +11,7 @@ import Act from './scenes/Act.jsx';
 import Profile from './scenes/Profile.jsx';
 
 const SCENES = {
+  title: Title,
   account: Account,
   biome: Biome,
   postcard: Postcard,
@@ -22,17 +24,18 @@ const SCENES = {
 
 export default function App() {
   const { state } = useGame();
-  const Scene = SCENES[state.scene] || Account;
-  const first = useRef(true);
+  const Scene = SCENES[state.scene] || Title;
+  const shownScene = useRef(null);
 
-  // On scene change, move to the top and put focus on the new heading for keyboard/screen-reader users.
+  // On scene change, move to the top and focus the scene's [data-autofocus] control, else its heading,
+  // for keyboard/screen-reader users. Runs once per real change (StrictMode re-runs effects in dev).
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-    window.scrollTo(0, 0);
-    document.querySelector('h1')?.focus();
+    if (shownScene.current === state.scene) return;
+    const initial = shownScene.current === null;
+    shownScene.current = state.scene;
+    if (!initial) window.scrollTo(0, 0);
+    const target = document.querySelector('[data-autofocus]') || (!initial && document.querySelector('h1'));
+    target?.focus();
   }, [state.scene]);
 
   return <Scene key={`${state.scene}:${state.introId ?? state.gameId ?? ''}`} />;

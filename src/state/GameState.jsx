@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 const STORAGE_KEY = 'cg_save';
 const VERSION = 2;
 
-export const SCENE_ORDER = ['account', 'biome', 'postcard', 'map', 'intro', 'game', 'act', 'profile'];
+export const SCENE_ORDER = ['title', 'account', 'biome', 'postcard', 'map', 'intro', 'game', 'act', 'profile'];
 
 const INITIAL = {
   version: VERSION,
@@ -11,7 +11,9 @@ const INITIAL = {
   avatarColor: 'green',
   // Where the player wants to explore (as typed or picked in the place search).
   place: '',
-  scene: 'account',
+  // Every launch opens on the title screen; PLAY continues at resumeScene (not saved itself).
+  scene: 'title',
+  resumeScene: 'account',
   solvedProblems: [],
   // Per collected card: { outcome: 'good'|'bad', points, at: 'YYYY-MM-DD' }.
   results: {},
@@ -29,30 +31,37 @@ function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return INITIAL;
-    const saved = JSON.parse(raw);
-    if (saved.version !== VERSION) {
-      // Older save (pre-scenario system): keep the player, reset progress.
-      const scene = saved.playerName && SCENE_ORDER.includes(saved.scene) ? saved.scene : saved.playerName ? 'map' : 'account';
-      return { ...INITIAL, playerName: saved.playerName || '', avatarColor: saved.avatarColor || 'green', scene };
-    }
-    // Stat bars are feedback on choices, never a managed resource — older saves' totals are dropped.
-    const { bars, lastGain, ...kept } = saved;
-    const state = { ...INITIAL, ...kept };
-    if (!Array.isArray(state.solvedProblems)) state.solvedProblems = [];
-    // Saves from before the intro/game split.
-    if (state.scene === 'scenario') Object.assign(state, { scene: state.run ? 'game' : 'map', gameId: state.run?.id ?? null });
-    if (state.run?.phase === 'intro') state.run = { ...state.run, phase: 'explore' };
-    if (!SCENE_ORDER.includes(state.scene) || !state.playerName) state.scene = 'account';
-    if (state.scene === 'intro' || (state.scene === 'game' && !state.gameId)) state.scene = 'map';
-    return state;
+    const saved = loadSaved(JSON.parse(raw));
+    return { ...saved, scene: 'title', resumeScene: saved.scene };
   } catch {
     return INITIAL;
   }
 }
 
+// The saved game, migrated, with `scene` set to where PLAY should resume.
+function loadSaved(saved) {
+  if (saved.version !== VERSION) {
+    // Older save (pre-scenario system): keep the player, reset progress.
+    const scene = saved.playerName ? 'map' : 'account';
+    return { ...INITIAL, playerName: saved.playerName || '', avatarColor: saved.avatarColor || 'green', scene };
+  }
+  // Stat bars are feedback on choices, never a managed resource — older saves' totals are dropped.
+  const { bars, lastGain, ...kept } = saved;
+  const state = { ...INITIAL, ...kept };
+  if (!Array.isArray(state.solvedProblems)) state.solvedProblems = [];
+  // Saves from before the intro/game split.
+  if (state.scene === 'scenario') Object.assign(state, { scene: state.run ? 'game' : 'map', gameId: state.run?.id ?? null });
+  if (state.run?.phase === 'intro') state.run = { ...state.run, phase: 'explore' };
+  if (!SCENE_ORDER.includes(state.scene) || state.scene === 'title' || !state.playerName) state.scene = 'account';
+  if (state.scene === 'intro' || (state.scene === 'game' && !state.gameId)) state.scene = 'map';
+  return state;
+}
+
 function save(state) {
-  const { introId, ...rest } = state;
-  const toSave = state.scene === 'intro' ? { ...rest, scene: 'map' } : rest;
+  const { introId, resumeScene, ...rest } = state;
+  let toSave = rest;
+  if (state.scene === 'intro') toSave = { ...rest, scene: 'map' };
+  if (state.scene === 'title') toSave = { ...rest, scene: resumeScene };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   } catch {
